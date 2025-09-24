@@ -92,6 +92,14 @@ Siga as instruções abaixo para configurar e executar o projeto localmente.
     curl -X POST -H "Content-Type: application/json" -d '{"name": "Bebidas", "isActive": true}' http://localhost:3000/categorie
     ```
 
+#### Listar todas as categorias
+*   **Método:** `GET`
+*   **Endpoint:** `/categories`
+*   **Exemplo com cURL:**
+    ```bash
+    curl http://localhost:3000/categories
+    ```
+
 #### Listar produtos de uma categoria
 *   **Método:** `GET`
 *   **Endpoint:** `/categories/:id/products`

@@ -3,6 +3,7 @@ import { createLazyFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useCategories } from '../hooks/useCategories';
 import { api } from '../lib/axios';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,14 +15,33 @@ export const Route = createLazyFileRoute('/products/add')({
 });
 
 function AddProduct() {
+  const queryClient = useQueryClient();
   const { data: categories, isLoading: isLoadingCategories, isError: isErrorCategories } = useCategories();
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+
+  const addCategoryMutation = useMutation({
+    mutationFn: (newCategory: { name: string; isActive: boolean }) => {
+      return api.post('/categorie', newCategory);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setNewCategoryName('');
+    },
+  });
+
+  const handleAddNewCategory = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (newCategoryName.trim() !== '') {
+      addCategoryMutation.mutate({ name: newCategoryName, isActive: true });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +79,7 @@ function AddProduct() {
           <CardTitle className="text-2xl">Adicionar Novo Produto</CardTitle>
           <CardDescription>Preencha os detalhes do produto abaixo.</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-6'>
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <label htmlFor="name" className="font-medium text-gray-300">Nome do Produto</label>
@@ -99,6 +119,31 @@ function AddProduct() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* adiciona categorias */}
+              <div className="flex space-x-2 pt-2">
+                <Input
+                  id="new-category"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  placeholder="Ou adicione uma nova categoria"
+                  disabled={addCategoryMutation.isPending}
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddNewCategory}
+                  disabled={addCategoryMutation.isPending || !newCategoryName.trim()}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {addCategoryMutation.isPending ? 'Adicionando...' : 'Adicionar'}
+                </Button>
+              </div>
+              {addCategoryMutation.isError && (
+                <p className="text-red-400 text-sm">
+                  Erro ao adicionar categoria: {addCategoryMutation.error?.message}
+                </p>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col items-stretch">
