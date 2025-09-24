@@ -52,7 +52,7 @@ function Wristbands() {
         <div className="mb-4">
           <label htmlFor="qr-code" className="block mb-1 font-medium">
             QR Code:
-          </label>
+          </label> 
           <input
             id="qr-code"
             type="text"

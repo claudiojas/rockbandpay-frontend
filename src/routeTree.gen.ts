@@ -12,9 +12,20 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
 
+const WristbandsOverviewLazyRouteImport = createFileRoute(
+  '/wristbands-overview',
+)()
 const WristbandsLazyRouteImport = createFileRoute('/wristbands')()
 const IndexLazyRouteImport = createFileRoute('/')()
+const ProductsAddLazyRouteImport = createFileRoute('/products/add')()
 
+const WristbandsOverviewLazyRoute = WristbandsOverviewLazyRouteImport.update({
+  id: '/wristbands-overview',
+  path: '/wristbands-overview',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/wristbands-overview.lazy').then((d) => d.Route),
+)
 const WristbandsLazyRoute = WristbandsLazyRouteImport.update({
   id: '/wristbands',
   path: '/wristbands',
@@ -25,35 +36,60 @@ const IndexLazyRoute = IndexLazyRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+const ProductsAddLazyRoute = ProductsAddLazyRouteImport.update({
+  id: '/products/add',
+  path: '/products/add',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/products.add.lazy').then((d) => d.Route))
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/wristbands': typeof WristbandsLazyRoute
+  '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/products/add': typeof ProductsAddLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/wristbands': typeof WristbandsLazyRoute
+  '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/products/add': typeof ProductsAddLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
   '/wristbands': typeof WristbandsLazyRoute
+  '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/products/add': typeof ProductsAddLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/wristbands'
+  fullPaths: '/' | '/wristbands' | '/wristbands-overview' | '/products/add'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/wristbands'
-  id: '__root__' | '/' | '/wristbands'
+  to: '/' | '/wristbands' | '/wristbands-overview' | '/products/add'
+  id:
+    | '__root__'
+    | '/'
+    | '/wristbands'
+    | '/wristbands-overview'
+    | '/products/add'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   WristbandsLazyRoute: typeof WristbandsLazyRoute
+  WristbandsOverviewLazyRoute: typeof WristbandsOverviewLazyRoute
+  ProductsAddLazyRoute: typeof ProductsAddLazyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wristbands-overview': {
+      id: '/wristbands-overview'
+      path: '/wristbands-overview'
+      fullPath: '/wristbands-overview'
+      preLoaderRoute: typeof WristbandsOverviewLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wristbands': {
       id: '/wristbands'
       path: '/wristbands'
@@ -68,12 +104,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/products/add': {
+      id: '/products/add'
+      path: '/products/add'
+      fullPath: '/products/add'
+      preLoaderRoute: typeof ProductsAddLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   WristbandsLazyRoute: WristbandsLazyRoute,
+  WristbandsOverviewLazyRoute: WristbandsOverviewLazyRoute,
+  ProductsAddLazyRoute: ProductsAddLazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
