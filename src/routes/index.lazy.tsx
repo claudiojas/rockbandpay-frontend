@@ -27,11 +27,6 @@ interface Order {
   wristbandId: string;
 }
 
-interface OrderItemPayload {
-  productId: string;
-  quantity: number;
-}
-
 interface Consumption {
   orderItems: {
     id: string;
@@ -105,16 +100,28 @@ function Index() {
       const newOrder = orderResponse.data;
 
       const groupedItems = currentOrder.reduce((acc, product) => {
-        acc[product.id] = (acc[product.id] || 0) + 1;
+        if (!acc[product.id]) {
+          acc[product.id] = {
+            productId: product.id,
+            quantity: 0,
+            unitPrice: parseFloat(product.price),
+          };
+        }
+        acc[product.id].quantity += 1;
         return acc;
-      }, {} as Record<string, number>);
+      }, {} as Record<string, { productId: string; quantity: number; unitPrice: number; }>);
 
-      const itemsPayload: OrderItemPayload[] = Object.keys(groupedItems).map(productId => ({
-        productId,
-        quantity: groupedItems[productId],
-      }));
+      const addItemPromises = Object.values(groupedItems).map(item => {
+        const payload = {
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalPrice: item.unitPrice * item.quantity,
+        };
+        return api.post(`/orders/${newOrder.id}/items`, payload);
+      });
 
-      await api.post(`/orders/${newOrder.id}/items`, { items: itemsPayload });
+      await Promise.all(addItemPromises);
 
       setSubmitMessage('Pedido finalizado com sucesso!');
       setCurrentOrder([]);
@@ -133,15 +140,26 @@ function Index() {
     setSubmitMessage('');
     try {
       const wristbandRes = await api.get<Wristband>(`/wristbands/${wristbandCode}`);
-      if (!wristbandRes.data) {
+      const wristbandId = wristbandRes.data?.id;
+
+      if (!wristbandId) {
         throw new Error('Pulseira não encontrada.');
       }
-      const consumptionRes = await api.get<Consumption>(`/orders/${wristbandRes.data.id}`);
-      setConsumptionData(consumptionRes.data);
+
+      const consumptionRes = await api.get<Consumption>(`/orders/${wristbandId}`);
+      setConsumptionData(consumptionRes.data || { orderItems: [], total: 0 });
       setShowConsumptionModal(true);
+
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Falha ao buscar consumo.';
-      setSubmitMessage(`Erro: ${errorMessage}`);
+      // Se a API retornar 404 para o consumo, significa que não há pedidos, o que é um cenário esperado.
+      // Nesses casos, abrimos o modal com o estado zerado.
+      if (err.response && err.response.status === 404 && err.config.url.includes('/orders/')) {
+        setConsumptionData({ orderItems: [], total: 0 });
+        setShowConsumptionModal(true);
+      } else {
+        const errorMessage = err.response?.data?.message || err.message || 'Falha ao buscar consumo.';
+        setSubmitMessage(`Erro: ${errorMessage}`);
+      }
     } finally {
       setIsLoadingConsumption(false);
     }
