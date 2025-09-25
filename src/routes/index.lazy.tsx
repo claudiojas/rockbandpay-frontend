@@ -20,9 +20,12 @@ interface Product {
   categoryId: string;
 }
 
-interface Wristband {
+interface OrderItem {
   id: string;
-  code: string;
+  quantity: number;
+  unitPrice: string;
+  totalPrice: string;
+  product: Product;
 }
 
 type OrderStatus = 'PENDING' | 'COMPLETED' | 'CANCELED';
@@ -32,7 +35,15 @@ interface IOrder {
   status: OrderStatus;
   totalAmount: string;
   createdAt: string;
+  orderItems: OrderItem[];
 }
+
+interface IWristbandWithDetails {
+  id: string;
+  code: string;
+  orders: IOrder[];
+}
+
 
 export const Route = createLazyFileRoute('/')({
   component: Index,
@@ -51,7 +62,7 @@ function Index() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
 
-  const [orderHistory, setOrderHistory] = useState<IOrder[] | null>(null);
+  const [wristbandDetails, setWristbandDetails] = useState<IWristbandWithDetails | null>(null);
   const [isLoadingConsumption, setIsLoadingConsumption] = useState(false);
   const [showOrderHistoryModal, setShowOrderHistoryModal] = useState(false);
 
@@ -94,7 +105,7 @@ function Index() {
     setSubmitMessage('Finalizando pedido...');
 
     try {
-      const wristbandResponse = await api.get<Wristband>(`/wristbands/${wristbandCode}`);
+      const wristbandResponse = await api.get<{id: string}>(`/wristbands/${wristbandCode}`);
       const wristband = wristbandResponse.data;
       if (!wristband) throw new Error('Pulseira não encontrada.');
 
@@ -141,25 +152,12 @@ function Index() {
     setIsLoadingConsumption(true);
     setSubmitMessage('');
     try {
-      const wristbandRes = await api.get<Wristband>(`/wristbands/${wristbandCode}`);
-      const wristbandId = wristbandRes.data?.id;
-
-      if (!wristbandId) {
-        throw new Error('Pulseira não encontrada.');
-      }
-
-      const historyRes = await api.get<IOrder[]>(`/orders/${wristbandId}`);
-      setOrderHistory(historyRes.data || []);
+      const response = await api.get<IWristbandWithDetails>(`/wristbands/${wristbandCode}`);
+      setWristbandDetails(response.data);
       setShowOrderHistoryModal(true);
-
     } catch (err: any) {
       if (err.response && err.response.status === 404) {
-        if (err.config.url.includes('/orders/')) {
-          setOrderHistory([]);
-          setShowOrderHistoryModal(true);
-        } else {
-          setSubmitMessage('Erro: Pulseira não encontrada.');
-        }
+        setSubmitMessage('Erro: Pulseira não encontrada.');
       } else {
         const errorMessage = err.response?.data?.message || err.message || 'Falha ao buscar histórico.';
         setSubmitMessage(`Erro: ${errorMessage}`);
@@ -208,11 +206,10 @@ function Index() {
           onAddToOrder={addProductToOrder}
         />
       )}
-      {showOrderHistoryModal && orderHistory && (
+      {showOrderHistoryModal && (
         <OrderHistoryModal
-          orders={orderHistory}
+          wristband={wristbandDetails}
           onClose={() => setShowOrderHistoryModal(false)}
-          wristbandCode={wristbandCode}
         />
       )}
     </div>

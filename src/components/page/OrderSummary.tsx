@@ -88,8 +88,8 @@ export function OrderSummary({
               onClick={handleFinalizeOrder}
               disabled={!wristbandCode || currentOrder.length === 0 || isSubmitting}
               className="w-full p-6 text-lg font-bold bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-600"
-            >
-              {isSubmitting ? 'Finalizando...' : 'Finalizar Pedido'}
+            >á
+              {isSubmitting ? 'Adicionando...' : 'Adicionar à mesa'}
             </Button>
           </CardFooter>
         </Card>
