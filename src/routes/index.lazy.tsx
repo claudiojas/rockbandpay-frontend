@@ -14,6 +14,7 @@ interface Product {
   id: string;
   name: string;
   price: string;
+  description: string | null;
   categoryId: string;
 }
 
@@ -293,6 +294,7 @@ function ProductModal({ product, onClose, onAddToOrder }: { product: Product; on
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50" onClick={onClose}>
       <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg w-full max-w-md" onClick={e => e.stopPropagation()}>
         <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
+        {product.description && <p className="text-gray-300 mb-6 text-base">{product.description}</p>}
         <p className="text-4xl font-semibold text-emerald-400 mb-8">
           R$ {parseFloat(product.price).toFixed(2)}
         </p>
@@ -307,7 +309,7 @@ function ProductModal({ product, onClose, onAddToOrder }: { product: Product; on
             min="1"
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4">
           <Button onClick={onClose} className="w-full p-6 text-lg bg-gray-600 hover:bg-gray-700">Cancelar</Button>
           <Button onClick={handleAdd} className="w-full p-6 text-lg bg-blue-600 hover:bg-blue-700">Adicionar ao Pedido</Button>
         </div>
