@@ -22,21 +22,14 @@ interface Wristband {
   code: string;
 }
 
-interface Order {
-  id: string;
-  wristbandId: string;
-}
+// Based on backend/src/interfaces/order.interface.ts
+type OrderStatus = 'PENDING' | 'COMPLETED' | 'CANCELED';
 
-interface Consumption {
-  orderItems: {
-    id: string;
-    product: {
-      name: string;
-      price: string;
-    };
-    quantity: number;
-  }[];
-  total: number;
+interface IOrder {
+  id: string;
+  status: OrderStatus;
+  totalAmount: string; // Prisma Decimal is serialized as a string
+  createdAt: string; // Dates are serialized as strings
 }
 
 // --- Componente Principal ---
@@ -55,9 +48,9 @@ function Index() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
 
-  const [consumptionData, setConsumptionData] = useState<Consumption | null>(null);
+  const [orderHistory, setOrderHistory] = useState<IOrder[] | null>(null);
   const [isLoadingConsumption, setIsLoadingConsumption] = useState(false);
-  const [showConsumptionModal, setShowConsumptionModal] = useState(false);
+  const [showOrderHistoryModal, setShowOrderHistoryModal] = useState(false);
 
   const addProductToOrder = (product: Product, quantity: number) => {
     setSubmitMessage('');
@@ -96,7 +89,7 @@ function Index() {
       const wristband = wristbandResponse.data;
       if (!wristband) throw new Error('Pulseira não encontrada.');
 
-      const orderResponse = await api.post<Order>('/orders', { wristbandId: wristband.id });
+      const orderResponse = await api.post<IOrder>('/orders', { wristbandId: wristband.id });
       const newOrder = orderResponse.data;
 
       const groupedItems = currentOrder.reduce((acc, product) => {
@@ -146,18 +139,20 @@ function Index() {
         throw new Error('Pulseira não encontrada.');
       }
 
-      const consumptionRes = await api.get<Consumption>(`/orders/${wristbandId}`);
-      setConsumptionData(consumptionRes.data || { orderItems: [], total: 0 });
-      setShowConsumptionModal(true);
+      const historyRes = await api.get<IOrder[]>(`/orders/${wristbandId}`);
+      setOrderHistory(historyRes.data || []);
+      setShowOrderHistoryModal(true);
 
     } catch (err: any) {
-      // Se a API retornar 404 para o consumo, significa que não há pedidos, o que é um cenário esperado.
-      // Nesses casos, abrimos o modal com o estado zerado.
-      if (err.response && err.response.status === 404 && err.config.url.includes('/orders/')) {
-        setConsumptionData({ orderItems: [], total: 0 });
-        setShowConsumptionModal(true);
+      if (err.response && err.response.status === 404) {
+        if (err.config.url.includes('/orders/')) {
+          setOrderHistory([]);
+          setShowOrderHistoryModal(true);
+        } else {
+          setSubmitMessage('Erro: Pulseira não encontrada.');
+        }
       } else {
-        const errorMessage = err.response?.data?.message || err.message || 'Falha ao buscar consumo.';
+        const errorMessage = err.response?.data?.message || err.message || 'Falha ao buscar histórico.';
         setSubmitMessage(`Erro: ${errorMessage}`);
       }
     } finally {
@@ -271,10 +266,10 @@ function Index() {
           onAddToOrder={addProductToOrder}
         />
       )}
-      {showConsumptionModal && consumptionData && (
-        <ConsumptionModal
-          consumption={consumptionData}
-          onClose={() => setShowConsumptionModal(false)}
+      {showOrderHistoryModal && orderHistory && (
+        <OrderHistoryModal
+          orders={orderHistory}
+          onClose={() => setShowOrderHistoryModal(false)}
           wristbandCode={wristbandCode}
         />
       )}
@@ -321,31 +316,45 @@ function ProductModal({ product, onClose, onAddToOrder }: { product: Product; on
   );
 }
 
-function ConsumptionModal({ consumption, onClose, wristbandCode }: { consumption: Consumption; onClose: () => void; wristbandCode: string; }) {
+function OrderHistoryModal({ orders, onClose, wristbandCode }: { orders: IOrder[]; onClose: () => void; wristbandCode: string; }) {
+  const grandTotal = orders.reduce((acc, order) => acc + parseFloat(order.totalAmount), 0);
+
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50" onClick={onClose}>
-      <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg w-full max-w-lg" onClick={e => e.stopPropagation()}>
-        <h2 className="text-2xl font-bold mb-2">Consumo da Pulseira</h2>
+      <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+        <h2 className="text-2xl font-bold mb-2">Histórico de Pedidos</h2>
         <p className="text-lg text-amber-400 mb-6">{wristbandCode}</p>
 
-        <div className="max-h-96 overflow-y-auto pr-3 space-y-3 mb-6">
-          {consumption.orderItems.length > 0 ? (
-            <ul className="space-y-3">
-              {consumption.orderItems.map((item) => (
-                <li key={item.id} className="flex justify-between items-center text-gray-300 bg-gray-700/50 p-3 rounded-md">
-                  <span>{item.quantity}x {item.product.name}</span>
-                  <span className="font-medium">R$ {parseFloat(item.product.price).toFixed(2)}</span>
+        <div className="max-h-96 overflow-y-auto pr-3 space-y-4 mb-6">
+          {orders.length > 0 ? (
+            <ul className="space-y-4">
+              {orders.map((order) => (
+                <li key={order.id} className="flex justify-between items-center text-gray-300 bg-gray-700/50 p-4 rounded-md">
+                  <div>
+                    <p className="font-semibold">Pedido #{order.id.substring(0, 8)}</p>
+                    <p className="text-sm text-gray-400">
+                      {new Date(order.createdAt).toLocaleString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-lg text-emerald-400">
+                      R$ {parseFloat(order.totalAmount).toFixed(2)}
+                    </p>
+                    <p className="text-sm capitalize">
+                      {order.status.toLowerCase()}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-center text-gray-400 py-8">Nenhum consumo registrado para esta pulseira.</p>
+            <p className="text-center text-gray-400 py-8">Nenhum pedido encontrado para esta pulseira.</p>
           )}
         </div>
 
         <div className="border-t border-gray-600 pt-4 flex justify-between items-center text-2xl font-bold text-white">
-          <span>Total Consumido:</span>
-          <span>R$ {consumption.total.toFixed(2)}</span>
+          <span>Gasto Total:</span>
+          <span>R$ {grandTotal.toFixed(2)}</span>
         </div>
 
         <div className="mt-8 text-center">

@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Route = createLazyFileRoute('/products/add')({
@@ -20,6 +21,7 @@ function AddProduct() {
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
 
@@ -58,11 +60,13 @@ function AddProduct() {
         name,
         price: parseFloat(price),
         categoryId,
+        description,
       });
 
       setSubmitMessage('Produto adicionado com sucesso!');
       setName('');
       setPrice('');
+      setDescription('');
       setCategoryId('');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Falha ao adicionar o produto.';
@@ -102,6 +106,17 @@ function AddProduct() {
                 onChange={(e) => setPrice(e.target.value)}
                 className="bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500"
                 placeholder="Ex: 15.50"
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="description" className="font-medium text-gray-300">Descrição (Opcional)</label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500"
+                placeholder="Ex: Cerveja pilsen leve e refrescante, com notas de malte e lúpulo."
                 disabled={isSubmitting}
               />
             </div>
