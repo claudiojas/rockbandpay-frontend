@@ -33,7 +33,7 @@ function Wristbands() {
   };
 
   return (
-    <div className="p-4 font-sans">
+    <div className="p-4 font-sans flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
       <h2 className="text-2xl font-bold mb-4">Criar Nova Pulseira</h2>
       <form onSubmit={handleCreateWristband} className="max-w-sm">
         <div className="mb-4">
