@@ -75,8 +75,9 @@ export function OrderHistoryModal({ wristband, onClose }: OrderHistoryModalProps
           <span className='font-mono'>R$ {grandTotal.toFixed(2)}</span>
         </div>
 
-        <div className="mt-8 text-center">
-          <Button onClick={onClose} className="p-4 text-lg bg-blue-600 hover:bg-blue-700">Fechar</Button>
+        <div className="mt-8 text-center flex gap-2">
+          <Button onClick={onClose} className="p-4 text-md bg-blue-600 hover:bg-blue-700">Sair</Button>
+          <Button onClick={onClose} className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
         </div>
       </div>
     </div>

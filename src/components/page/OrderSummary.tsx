@@ -41,7 +41,7 @@ export function OrderSummary({
           </CardHeader>
           <CardContent>
             <div className="mb-4 space-y-2">
-              <label htmlFor="wristband-code" className="font-medium text-gray-300">Código da Pulseira</label>
+              <label htmlFor="wristband-code" className="font-medium text-gray-300">Código da Mesa</label>
               <div className="flex gap-2">
                 <Input
                   id="wristband-code"
@@ -88,7 +88,7 @@ export function OrderSummary({
               onClick={handleFinalizeOrder}
               disabled={!wristbandCode || currentOrder.length === 0 || isSubmitting}
               className="w-full p-6 text-lg font-bold bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-600"
-            >á
+            >
               {isSubmitting ? 'Adicionando...' : 'Adicionar à mesa'}
             </Button>
           </CardFooter>
