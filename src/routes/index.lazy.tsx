@@ -98,7 +98,7 @@ function Index() {
       const wristband = wristbandResponse.data;
       if (!wristband) throw new Error('Pulseira não encontrada.');
 
-      const orderResponse = await api.post<IOrder>('/orders', { wristbandId: wristband.id });
+      const orderResponse = await api.post<IOrder>('/orders', { wristbandId: wristband.id, orderValue: total });
       const newOrder = orderResponse.data;
 
       const groupedItems = currentOrder.reduce((acc, product) => {
