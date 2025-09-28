@@ -62,13 +62,13 @@ function WristbandsOverview () {
   if (errorWristbands) return <div className="p-6 text-red-500">Erro ao carregar pulseiras: {errorWristbands.message}</div>
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-dark-bg-primary min-h-screen">
-      <h1 className="text-3xl font-extrabold mb-8 text-gray-800 dark:text-dark-text-primary">Consulta de Pulseiras</h1>
+    <div className="p-6 bg-gray-900 text-white dark:bg-dark-bg-primary min-h-screen">
+      <h1 className="text-3xl font-extrabold mb-8 dark:text-dark-text-primary">Consulta de Pulseiras</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Lista de Pulseiras */}
         <div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-700 dark:text-dark-text-primary">Todas as Pulseiras</h2>
+          <h2 className="text-2xl font-bold mb-4 dark:text-dark-text-primary">Todas as Pulseiras</h2>
           <ul className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6 space-y-3">
             {wristbands?.map((wristband) => (
               <li
@@ -89,7 +89,7 @@ function WristbandsOverview () {
 
         {/* Detalhes do Consumo da Pulseira Selecionada */}
         <div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-700 dark:text-dark-text-primary">Consumo da Pulseira Selecionada</h2>
+          <h2 className="text-2xl font-bold mb-4 dark:text-dark-text-primary">Consumo da Pulseira Selecionada</h2>
           {selectedWristbandId ? (
             <div className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6">
               {isLoadingOrders && <p className="text-dark-text-primary">Carregando consumo...</p>}
