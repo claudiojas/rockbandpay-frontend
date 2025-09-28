@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/axios'
 import { useState } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button';
+
 
 // Interfaces alinhadas com a resposta da API de /wristbands/{code}
 interface Product {
@@ -137,6 +139,9 @@ function WristbandsOverview () {
                           <span>R$ {grandTotal.toFixed(2)}</span>
                         </div>
                       </CardFooter>
+                      <div className="mt-8 px-5 text-center flex gap-2">
+                        <Button className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
+                      </div>
                     </Card>
                   )
                 })()
