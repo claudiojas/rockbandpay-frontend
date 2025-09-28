@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createLazyFileRoute } from '@tanstack/react-router';
+import { Link, createLazyFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
 import { api } from '../lib/axios';
 
-// Import new components
+import { Button } from '@/components/ui/button';
 import { MenuList } from '@/components/page/MenuList';
 import { OrderSummary } from '@/components/page/OrderSummary';
 import { ProductModal } from '@/components/page/ProductModal';
@@ -176,42 +176,50 @@ function Index() {
   }
 
   return (
-    <div className="flex gap-8 p-8 bg-gray-900 text-gray-100 min-h-screen">
-      <MenuList
-        productsByCategory={productsByCategory}
-        categories={categories}
-        isLoadingCategories={isLoadingCategories}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedCategoryId={selectedCategoryId}
-        setSelectedCategoryId={setSelectedCategoryId}
-        onProductClick={setSelectedProduct}
-      />
-      <OrderSummary
-        wristbandCode={wristbandCode}
-        setWristbandCode={setWristbandCode}
-        handleCheckConsumption={handleCheckConsumption}
-        isLoadingConsumption={isLoadingConsumption}
-        currentOrder={currentOrder}
-        total={total}
-        submitMessage={submitMessage}
-        handleFinalizeOrder={handleFinalizeOrder}
-        isSubmitting={isSubmitting}
-      />
+    <div className="bg-gray-900 text-gray-100 min-h-screen p-8">
+      <header className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Ponto de Venda</h1>
+        <Link to="/cash-register/close">
+          <Button variant="outline">Fechar Caixa</Button>
+        </Link>
+      </header>
+      <div className="flex gap-8">
+        <MenuList
+          productsByCategory={productsByCategory}
+          categories={categories}
+          isLoadingCategories={isLoadingCategories}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedCategoryId={selectedCategoryId}
+          setSelectedCategoryId={setSelectedCategoryId}
+          onProductClick={setSelectedProduct}
+        />
+        <OrderSummary
+          wristbandCode={wristbandCode}
+          setWristbandCode={setWristbandCode}
+          handleCheckConsumption={handleCheckConsumption}
+          isLoadingConsumption={isLoadingConsumption}
+          currentOrder={currentOrder}
+          total={total}
+          submitMessage={submitMessage}
+          handleFinalizeOrder={handleFinalizeOrder}
+          isSubmitting={isSubmitting}
+        />
 
-      {selectedProduct && (
-        <ProductModal
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          onAddToOrder={addProductToOrder}
-        />
-      )}
-      {showOrderHistoryModal && (
-        <OrderHistoryModal
-          wristband={wristbandDetails}
-          onClose={() => setShowOrderHistoryModal(false)}
-        />
-      )}
+        {selectedProduct && (
+          <ProductModal
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            onAddToOrder={addProductToOrder}
+          />
+        )}
+        {showOrderHistoryModal && (
+          <OrderHistoryModal
+            wristband={wristbandDetails}
+            onClose={() => setShowOrderHistoryModal(false)}
+          />
+        )}
+      </div>
     </div>
   );
 }

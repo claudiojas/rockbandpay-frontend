@@ -19,6 +19,9 @@ const WristbandsLazyRouteImport = createFileRoute('/wristbands')()
 const LoginLazyRouteImport = createFileRoute('/login')()
 const IndexLazyRouteImport = createFileRoute('/')()
 const ProductsAddLazyRouteImport = createFileRoute('/products/add')()
+const CashRegisterCloseLazyRouteImport = createFileRoute(
+  '/cash-register/close',
+)()
 
 const WristbandsOverviewLazyRoute = WristbandsOverviewLazyRouteImport.update({
   id: '/wristbands-overview',
@@ -47,12 +50,20 @@ const ProductsAddLazyRoute = ProductsAddLazyRouteImport.update({
   path: '/products/add',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/products.add.lazy').then((d) => d.Route))
+const CashRegisterCloseLazyRoute = CashRegisterCloseLazyRouteImport.update({
+  id: '/cash-register/close',
+  path: '/cash-register/close',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/cash-register.close.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginLazyRoute
   '/wristbands': typeof WristbandsLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
 }
 export interface FileRoutesByTo {
@@ -60,6 +71,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginLazyRoute
   '/wristbands': typeof WristbandsLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
 }
 export interface FileRoutesById {
@@ -68,6 +80,7 @@ export interface FileRoutesById {
   '/login': typeof LoginLazyRoute
   '/wristbands': typeof WristbandsLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
 }
 export interface FileRouteTypes {
@@ -77,15 +90,23 @@ export interface FileRouteTypes {
     | '/login'
     | '/wristbands'
     | '/wristbands-overview'
+    | '/cash-register/close'
     | '/products/add'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/wristbands' | '/wristbands-overview' | '/products/add'
+  to:
+    | '/'
+    | '/login'
+    | '/wristbands'
+    | '/wristbands-overview'
+    | '/cash-register/close'
+    | '/products/add'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/wristbands'
     | '/wristbands-overview'
+    | '/cash-register/close'
     | '/products/add'
   fileRoutesById: FileRoutesById
 }
@@ -94,6 +115,7 @@ export interface RootRouteChildren {
   LoginLazyRoute: typeof LoginLazyRoute
   WristbandsLazyRoute: typeof WristbandsLazyRoute
   WristbandsOverviewLazyRoute: typeof WristbandsOverviewLazyRoute
+  CashRegisterCloseLazyRoute: typeof CashRegisterCloseLazyRoute
   ProductsAddLazyRoute: typeof ProductsAddLazyRoute
 }
 
@@ -134,6 +156,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsAddLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cash-register/close': {
+      id: '/cash-register/close'
+      path: '/cash-register/close'
+      fullPath: '/cash-register/close'
+      preLoaderRoute: typeof CashRegisterCloseLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -142,6 +171,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginLazyRoute: LoginLazyRoute,
   WristbandsLazyRoute: WristbandsLazyRoute,
   WristbandsOverviewLazyRoute: WristbandsOverviewLazyRoute,
+  CashRegisterCloseLazyRoute: CashRegisterCloseLazyRoute,
   ProductsAddLazyRoute: ProductsAddLazyRoute,
 }
 export const routeTree = rootRouteImport

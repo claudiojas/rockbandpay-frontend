@@ -1,0 +1,9 @@
+import { createLazyFileRoute } from '@tanstack/react-router'
+
+export const Route = createLazyFileRoute('/cash-register/close')({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  return <div>Hello "/cash-register/close"!</div>
+}
