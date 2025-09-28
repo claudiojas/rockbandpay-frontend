@@ -2,6 +2,14 @@ import { createLazyFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/axios'
 import { useState } from 'react'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+
+// Interfaces alinhadas com a resposta da API de /wristbands/{code}
+interface Product {
+  id: string;
+  name: string;
+  price: string;
+}
 
 interface Wristband {
   id: string
@@ -16,21 +24,20 @@ interface OrderItem {
   productId: string
   orderId: string
   quantity: number
-  price: number
+  unitPrice: string; // Corrigido
+  totalPrice: string;
   createdAt: string
   updatedAt: string
-  product: {
-    name: string
-  }
+  product: Product
 }
 
 interface Order {
   id: string
   wristbandId: string
-  total: number
+  totalAmount: string; // Corrigido
   createdAt: string
   updatedAt: string
-  items: OrderItem[]
+  orderItems: OrderItem[]
 }
 
 export const Route = createLazyFileRoute('/wristbands-overview')({
@@ -38,7 +45,7 @@ export const Route = createLazyFileRoute('/wristbands-overview')({
 })
 
 function WristbandsOverview () {
-  const [selectedWristbandId, setSelectedWristbandId] = useState<string | null>(null)
+  const [selectedWristbandCode, setSelectedWristbandCode] = useState<string | null>(null)
 
   const { data: wristbands, isLoading: isLoadingWristbands, error: errorWristbands } = useQuery<Wristband[]> ({
     queryKey: ['wristbands'],
@@ -49,13 +56,13 @@ function WristbandsOverview () {
   })
 
   const { data: orders, isLoading: isLoadingOrders, error: errorOrders } = useQuery<Order[]> ({
-    queryKey: ['orders', selectedWristbandId],
+    queryKey: ['wristband-details', selectedWristbandCode],
     queryFn: async () => {
-      if (!selectedWristbandId) return []
-      const response = await api.get(`/orders/${selectedWristbandId}`)
-      return response.data
+      if (!selectedWristbandCode) return []
+      const response = await api.get<{ orders: Order[] }>(`/wristbands/${selectedWristbandCode}`)
+      return response.data.orders
     },
-    enabled: !!selectedWristbandId,
+    enabled: !!selectedWristbandCode,
   })
 
   if (isLoadingWristbands) return <div className="p-6 text-dark-text-primary">Carregando pulseiras...</div>
@@ -74,14 +81,14 @@ function WristbandsOverview () {
               <li
                 key={wristband.id}
                 className={`p-4 rounded-md cursor-pointer transition-colors duration-200 ${
-                  selectedWristbandId === wristband.id
+                  selectedWristbandCode === wristband.code
                     ? 'bg-dark-accent text-white shadow-md'
                     : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-dark-text-primary'
                 }`}
-                onClick={() => setSelectedWristbandId(wristband.id)}
+                onClick={() => setSelectedWristbandCode(wristband.code)}
               >
+                {/* Exibindo apenas o código, como solicitado */}
                 <p className="font-semibold text-lg">Código: {wristband.code}</p>
-                <p className="text-sm text-gray-600 dark:text-dark-text-secondary">ID: {wristband.id}</p>
               </li>
             ))}
           </ul>
@@ -90,30 +97,56 @@ function WristbandsOverview () {
         {/* Detalhes do Consumo da Pulseira Selecionada */}
         <div>
           <h2 className="text-2xl font-bold mb-4 dark:text-dark-text-primary">Consumo da Pulseira Selecionada</h2>
-          {selectedWristbandId ? (
-            <div className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6">
+          {selectedWristbandCode ? (
+            <>
               {isLoadingOrders && <p className="text-dark-text-primary">Carregando consumo...</p>}
               {errorOrders && <p className="text-red-500">Erro ao carregar consumo: {errorOrders.message}</p>}
               {orders && orders.length > 0 ? (
-                orders.map((order) => (
-                  <div key={order.id} className="mb-6 p-5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700">
-                    <p className="font-bold text-xl mb-2 text-gray-800 dark:text-dark-text-primary">Pedido ID: {order.id}</p>
-                    <p className="text-lg text-gray-700 dark:text-dark-text-secondary">Total do Pedido: <span className="font-semibold">R$ {order.total.toFixed(2)}</span></p>
-                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-3">Data: {new Date(order.createdAt).toLocaleString()}</p>
-                    <h3 className="font-bold text-lg mt-4 mb-2 text-gray-800 dark:text-dark-text-primary">Itens:</h3>
-                    <ul className="list-disc pl-6 space-y-1 text-gray-700 dark:text-dark-text-secondary">
-                      {order.items.map((item) => (
-                        <li key={item.id}>
-                          {item.product.name} - {item.quantity}x - <span className="font-semibold">R$ {item.price.toFixed(2)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))
+                (() => {
+                  const allItems = orders.flatMap(order => order.orderItems || []).filter(Boolean);
+                  // Cálculo do total corrigido para usar totalAmount (string)
+                  const grandTotal = orders.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0);
+
+                  return (
+                    <Card className="bg-gray-800 border-gray-700 text-white">
+                      <CardHeader>
+                        <CardTitle className="text-2xl">Consumo Total</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <h3 className="text-lg font-semibold mb-4 text-gray-200">Itens Consumidos:</h3>
+                        <div className="max-h-96 overflow-y-auto pr-2 space-y-3">
+                          {allItems.length === 0 ? (
+                            <div className="text-center py-10"><p className="text-gray-400">Nenhum item consumido.</p></div>
+                          ) : (
+                            <ul className="space-y-3">
+                              {allItems.map((item) => (
+                                <li key={item.id} className="flex justify-between items-center text-gray-300">
+                                  <span>{item.quantity}x {item.product.name}</span>
+                                  {/* Preço do item corrigido para usar unitPrice (string) */}
+                                  <span className="font-medium">R$ {parseFloat(item.unitPrice || '0').toFixed(2)}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex-col items-stretch gap-4 bg-gray-800/50 p-6">
+                        <div className="flex justify-between items-center text-2xl font-bold text-white">
+                          <span>Total:</span>
+                          {/* Total corrigido */}
+                          <span>R$ {grandTotal.toFixed(2)}</span>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  )
+                })()
               ) : (
-                !isLoadingOrders && <p className="text-gray-600 dark:text-dark-text-secondary">Nenhum consumo registrado para esta pulseira.</p>
+                !isLoadingOrders &&
+                <div className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6">
+                    <p className="text-gray-600 dark:text-dark-text-secondary">Nenhum consumo registrado para esta pulseira.</p>
+                </div>
               )}
-            </div>
+            </>
           ) : (
             <div className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6 text-gray-600 dark:text-dark-text-secondary text-center text-lg">
               Selecione uma pulseira na lista ao lado para ver seu consumo.
