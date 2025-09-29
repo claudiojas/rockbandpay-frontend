@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/axios';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Definição de tipos com base na documentação da API
 interface PaymentBreakdown {
@@ -36,6 +37,7 @@ function CloseCashRegisterComponent() {
   const [details, setDetails] = useState<CashRegisterDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     api.get<CashRegisterDetails>('/cash-register/active-details')
@@ -52,16 +54,22 @@ function CloseCashRegisterComponent() {
       });
   }, []);
 
-  const handleCloseCashRegister = async () => {
-    try {
-      await api.post('/cash-register/close');
-      alert('Caixa fechado com sucesso!');
-      navigate({ to: '/' });
-    } catch (err) {
+  const closeCashRegisterMutation = useMutation({
+    mutationFn: async () => {
+      return api.post('/cash-register/close');
+    },
+    onSuccess: () => {
+      // Invalida a query de status para que o hook global seja notificado
+      queryClient.invalidateQueries({ queryKey: ['cash-register-status'] });
+      alert('Caixa fechado com sucesso! Redirecionando para o login.');
+      // Redireciona para a página de login
+      navigate({ to: '/login', replace: true });
+    },
+    onError: (err) => {
       alert('Erro ao fechar o caixa. Verifique se ele ainda está aberto.');
       console.error(err);
     }
-  };
+  });
 
   if (error) {
     return (
@@ -153,9 +161,10 @@ function CloseCashRegisterComponent() {
           <Button
             size="lg"
             variant="destructive"
-            onClick={handleCloseCashRegister}
+            onClick={() => closeCashRegisterMutation.mutate()}
+            disabled={closeCashRegisterMutation.isPending}
           >
-            Fechar Caixa
+            {closeCashRegisterMutation.isPending ? 'Fechando...' : 'Fechar Caixa'}
           </Button>
         </div>
       </div>
