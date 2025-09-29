@@ -33,6 +33,15 @@ Iniciamos o desenvolvimento da interface do sistema, utilizando uma arquitetura 
     - Permite que o operador feche o caixa através do endpoint `POST /cash-register/close`.
     - Durante o desenvolvimento, foi necessário depurar um erro de tipo (`.toFixed is not a function`), garantindo que todos os valores monetários recebidos da API sejam convertidos para números usando `parseFloat()` antes da formatação.
 
+3.  **Tela de Fechamento de Conta da Pulseira (Rota: `/close-bill/$code`)**
+    - Permite ao operador de caixa finalizar a conta de um cliente associada a uma pulseira.
+    - A tela exibe o consumo detalhado da pulseira, o valor total e permite a seleção de um método de pagamento (Dinheiro, PIX, Cartão de Débito, Cartão de Crédito).
+    - Ao confirmar, aciona o endpoint `POST /payments/close-bill` para registrar o pagamento.
+    - **Depuração e Resiliência:** A implementação desta tela passou por um ciclo de depuração iterativo, que fortaleceu o código:
+        - **Roteamento:** Corrigido um problema de aninhamento de rotas no TanStack Router, renomeando o arquivo da rota para criar uma rota de nível superior e garantir a navegação correta.
+        - **Comunicação com API:** Resolvida uma inconsistência entre o `ID` da pulseira (`code` vs. `id`) e o formato do `paymentMethod` (`string` vs. `enum`), garantindo que o frontend envie os dados exatamente como o backend espera, conforme definido no `schema.prisma`.
+        - **Tratamento de Erros:** O feedback de erro para o usuário foi aprimorado para exibir mensagens detalhadas da API, facilitando a identificação de problemas.
+
 ### Documentação do Frontend
 - Foi criado o arquivo `docs/CONTEXT-FRONTEND.md` para detalhar o estado atual do desenvolvimento do frontend, servindo como guia para a continuação do trabalho.
 

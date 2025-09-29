@@ -4,7 +4,7 @@ Este documento serve como um ponto de sincronia para desenvolvedores (humanos ou
 
 ## 1. Ponto Atual do Desenvolvimento
 
-O desenvolvimento atual está focado na construção das interfaces para o operador de caixa. A estrutura base do projeto está configurada, e as principais telas de operação estão sendo criadas. Acabamos de finalizar a implementação da tela de **Detalhes e Fechamento de Caixa**.
+O desenvolvimento atual está focado na construção das interfaces para o operador de caixa. A estrutura base do projeto está configurada, e as principais telas de operação estão sendo criadas. Acabamos de finalizar a implementação da tela de **Fechamento de Conta de Pulseira**.
 
 **Contexto Pendente:** Estamos aguardando uma verificação do backend sobre a origem e a regra de negócio do campo `expectedInCash`, que é exibido na tela de fechamento de caixa. A implementação atual consome este campo diretamente da API (`GET /cash-register/active-details`).
 
@@ -33,8 +33,23 @@ Até o momento, as seguintes funcionalidades e telas foram implementadas:
   - Permite ao operador **Fechar o Caixa** através de um botão que aciona o endpoint `POST /cash-register/close`.
   - Trata casos de erro, como quando nenhum caixa está aberto.
 
-### c. Outras Rotas e Componentes
-- **Login, Adicionar Produto, Criar Pulseira, etc.:** Existem links para essas rotas na navegação principal (`src/routes/__root.tsx`), indicando que são funcionalidades planejadas ou em desenvolvimento.
+### c. Tela de Consulta de Pulseiras (Rota: `/wristbands-overview`)
+- **Arquivo:** `src/routes/wristbands-overview.lazy.tsx`
+- **Funcionalidade:**
+  - Lista todas as pulseiras cadastradas.
+  - Ao selecionar uma pulseira, exibe o histórico de consumo e o valor total devido.
+- **Navegação:** Contém o link para a tela de "Fechar Conta" de uma pulseira específica.
+
+### d. Tela de Fechamento de Conta da Pulseira (Rota: `/close-bill/$code`)
+- **Arquivo:** `src/routes/close-bill.$code.lazy.tsx`
+- **Funcionalidade:**
+  - Carrega os dados de consumo da pulseira, identificada pelo seu `code` na URL.
+  - Exibe o resumo da conta e o valor total.
+  - Permite que o operador selecione um método de pagamento (Dinheiro, PIX, Débito, Crédito).
+  - Envia os dados para o backend (`POST /payments/close-bill`) para registrar o pagamento, tratando as respostas de sucesso e erro.
+
+### e. Outras Rotas e Componentes
+- **Login, Adicionar Produto, Criar Pulseira, etc.:** Existem arquivos de rota para essas funcionalidades, indicando que são funcionalidades planejadas ou em desenvolvimento.
 - **Componentes de UI:** O projeto utiliza componentes reutilizáveis de `src/components/ui` (Button, Card, etc.), baseados em `shadcn/ui`.
 
 ## 3. Estrutura do Projeto

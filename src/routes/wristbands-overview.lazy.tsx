@@ -1,4 +1,4 @@
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { createLazyFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/axios'
 import { useState } from 'react'
@@ -6,7 +6,19 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 
 
-// Interfaces alinhadas com a resposta da API de /wristbands/{code}
+// Interfaces e Enums baseados no Schema do Prisma
+const OrderStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  PREPARING: 'PREPARING',
+  READY: 'READY',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+  PAID: 'PAID',
+} as const;
+
+type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+
 interface Product {
   id: string;
   name: string;
@@ -26,7 +38,7 @@ interface OrderItem {
   productId: string
   orderId: string
   quantity: number
-  unitPrice: string; // Corrigido
+  unitPrice: string;
   totalPrice: string;
   createdAt: string
   updatedAt: string
@@ -36,10 +48,11 @@ interface OrderItem {
 interface Order {
   id: string
   wristbandId: string
-  totalAmount: string; // Corrigido
+  totalAmount: string;
   createdAt: string
   updatedAt: string
   orderItems: OrderItem[]
+  status: OrderStatus;
 }
 
 export const Route = createLazyFileRoute('/wristbands-overview')({
@@ -103,11 +116,11 @@ function WristbandsOverview () {
             <>
               {isLoadingOrders && <p className="text-dark-text-primary">Carregando consumo...</p>}
               {errorOrders && <p className="text-red-500">Erro ao carregar consumo: {errorOrders.message}</p>}
-              {orders && orders.length > 0 ? (
+              {orders && (
                 (() => {
-                  const allItems = orders.flatMap(order => order.orderItems || []).filter(Boolean);
-                  // Cálculo do total corrigido para usar totalAmount (string)
-                  const grandTotal = orders.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0);
+                  const pendingOrders = orders.filter(order => order.status !== OrderStatus.PAID);
+                  const allItems = pendingOrders.flatMap(order => order.orderItems || []).filter(Boolean);
+                  const grandTotal = pendingOrders.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0);
 
                   return (
                     <Card className="bg-gray-800 border-gray-700 text-white">
@@ -118,13 +131,12 @@ function WristbandsOverview () {
                         <h3 className="text-lg font-semibold mb-4 text-gray-200">Itens Consumidos:</h3>
                         <div className="max-h-96 overflow-y-auto pr-2 space-y-3">
                           {allItems.length === 0 ? (
-                            <div className="text-center py-10"><p className="text-gray-400">Nenhum item consumido.</p></div>
+                            <div className="text-center py-10"><p className="text-gray-400">Nenhum item pendente de pagamento.</p></div>
                           ) : (
                             <ul className="space-y-3">
                               {allItems.map((item) => (
                                 <li key={item.id} className="flex justify-between items-center text-gray-300">
                                   <span>{item.quantity}x {item.product.name}</span>
-                                  {/* Preço do item corrigido para usar unitPrice (string) */}
                                   <span className="font-medium">R$ {parseFloat(item.unitPrice || '0').toFixed(2)}</span>
                                 </li>
                               ))}
@@ -134,21 +146,24 @@ function WristbandsOverview () {
                       </CardContent>
                       <CardFooter className="flex-col items-stretch gap-4 bg-gray-800/50 p-6">
                         <div className="flex justify-between items-center text-2xl font-bold text-white">
-                          <span>Total:</span>
-                          {/* Total corrigido */}
+                          <span>Total Pendente:</span>
                           <span>R$ {grandTotal.toFixed(2)}</span>
                         </div>
                       </CardFooter>
-                      <div className="mt-8 px-5 text-center flex gap-2">
-                        <Button className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
-                      </div>
+                      {grandTotal > 0 && (
+                        <div className="mt-8 px-5 text-center flex gap-2">
+                          <Link to="/close-bill/$code" params={{ code: selectedWristbandCode }}>
+                            <Button className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
+                          </Link>
+                        </div>
+                      )}
                     </Card>
                   )
                 })()
-              ) : (
-                !isLoadingOrders &&
-                <div className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6">
-                    <p className="text-gray-600 dark:text-dark-text-secondary">Nenhum consumo registrado para esta pulseira.</p>
+              )}
+              {!isLoadingOrders && !orders?.some(order => order.status !== OrderStatus.PAID) && (
+                 <div className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6">
+                    <p className="text-gray-600 dark:text-dark-text-secondary">Nenhum consumo pendente para esta pulseira.</p>
                 </div>
               )}
             </>

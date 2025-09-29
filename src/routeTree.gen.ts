@@ -19,8 +19,12 @@ const WristbandsLazyRouteImport = createFileRoute('/wristbands')()
 const LoginLazyRouteImport = createFileRoute('/login')()
 const IndexLazyRouteImport = createFileRoute('/')()
 const ProductsAddLazyRouteImport = createFileRoute('/products/add')()
+const CloseBillCodeLazyRouteImport = createFileRoute('/close-bill/$code')()
 const CashRegisterCloseLazyRouteImport = createFileRoute(
   '/cash-register/close',
+)()
+const WristbandsCodeCloseLazyRouteImport = createFileRoute(
+  '/wristbands/$code/close',
 )()
 
 const WristbandsOverviewLazyRoute = WristbandsOverviewLazyRouteImport.update({
@@ -50,6 +54,13 @@ const ProductsAddLazyRoute = ProductsAddLazyRouteImport.update({
   path: '/products/add',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/products.add.lazy').then((d) => d.Route))
+const CloseBillCodeLazyRoute = CloseBillCodeLazyRouteImport.update({
+  id: '/close-bill/$code',
+  path: '/close-bill/$code',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/close-bill.$code.lazy').then((d) => d.Route),
+)
 const CashRegisterCloseLazyRoute = CashRegisterCloseLazyRouteImport.update({
   id: '/cash-register/close',
   path: '/cash-register/close',
@@ -57,31 +68,44 @@ const CashRegisterCloseLazyRoute = CashRegisterCloseLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/cash-register.close.lazy').then((d) => d.Route),
 )
+const WristbandsCodeCloseLazyRoute = WristbandsCodeCloseLazyRouteImport.update({
+  id: '/$code/close',
+  path: '/$code/close',
+  getParentRoute: () => WristbandsLazyRoute,
+} as any).lazy(() =>
+  import('./routes/wristbands.$code.close.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRoute
+  '/wristbands': typeof WristbandsLazyRouteWithChildren
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
+  '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
+  '/wristbands/$code/close': typeof WristbandsCodeCloseLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRoute
+  '/wristbands': typeof WristbandsLazyRouteWithChildren
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
+  '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
+  '/wristbands/$code/close': typeof WristbandsCodeCloseLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRoute
+  '/wristbands': typeof WristbandsLazyRouteWithChildren
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
+  '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
+  '/wristbands/$code/close': typeof WristbandsCodeCloseLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,7 +115,9 @@ export interface FileRouteTypes {
     | '/wristbands'
     | '/wristbands-overview'
     | '/cash-register/close'
+    | '/close-bill/$code'
     | '/products/add'
+    | '/wristbands/$code/close'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -99,7 +125,9 @@ export interface FileRouteTypes {
     | '/wristbands'
     | '/wristbands-overview'
     | '/cash-register/close'
+    | '/close-bill/$code'
     | '/products/add'
+    | '/wristbands/$code/close'
   id:
     | '__root__'
     | '/'
@@ -107,15 +135,18 @@ export interface FileRouteTypes {
     | '/wristbands'
     | '/wristbands-overview'
     | '/cash-register/close'
+    | '/close-bill/$code'
     | '/products/add'
+    | '/wristbands/$code/close'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
-  WristbandsLazyRoute: typeof WristbandsLazyRoute
+  WristbandsLazyRoute: typeof WristbandsLazyRouteWithChildren
   WristbandsOverviewLazyRoute: typeof WristbandsOverviewLazyRoute
   CashRegisterCloseLazyRoute: typeof CashRegisterCloseLazyRoute
+  CloseBillCodeLazyRoute: typeof CloseBillCodeLazyRoute
   ProductsAddLazyRoute: typeof ProductsAddLazyRoute
 }
 
@@ -156,6 +187,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsAddLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/close-bill/$code': {
+      id: '/close-bill/$code'
+      path: '/close-bill/$code'
+      fullPath: '/close-bill/$code'
+      preLoaderRoute: typeof CloseBillCodeLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cash-register/close': {
       id: '/cash-register/close'
       path: '/cash-register/close'
@@ -163,15 +201,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CashRegisterCloseLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wristbands/$code/close': {
+      id: '/wristbands/$code/close'
+      path: '/$code/close'
+      fullPath: '/wristbands/$code/close'
+      preLoaderRoute: typeof WristbandsCodeCloseLazyRouteImport
+      parentRoute: typeof WristbandsLazyRoute
+    }
   }
 }
+
+interface WristbandsLazyRouteChildren {
+  WristbandsCodeCloseLazyRoute: typeof WristbandsCodeCloseLazyRoute
+}
+
+const WristbandsLazyRouteChildren: WristbandsLazyRouteChildren = {
+  WristbandsCodeCloseLazyRoute: WristbandsCodeCloseLazyRoute,
+}
+
+const WristbandsLazyRouteWithChildren = WristbandsLazyRoute._addFileChildren(
+  WristbandsLazyRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
-  WristbandsLazyRoute: WristbandsLazyRoute,
+  WristbandsLazyRoute: WristbandsLazyRouteWithChildren,
   WristbandsOverviewLazyRoute: WristbandsOverviewLazyRoute,
   CashRegisterCloseLazyRoute: CashRegisterCloseLazyRoute,
+  CloseBillCodeLazyRoute: CloseBillCodeLazyRoute,
   ProductsAddLazyRoute: ProductsAddLazyRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,5 +1,17 @@
 import { Button } from '@/components/ui/button';
 
+const OrderStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  PREPARING: 'PREPARING',
+  READY: 'READY',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+  PAID: 'PAID',
+} as const;
+
+type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+
 interface Product {
   id: string;
   name: string;
@@ -13,8 +25,6 @@ interface OrderItem {
   totalPrice: string;
   product: Product;
 }
-
-type OrderStatus = 'PENDING' | 'COMPLETED' | 'CANCELED';
 
 interface IOrder {
   id: string;
@@ -38,20 +48,21 @@ interface OrderHistoryModalProps {
 export function OrderHistoryModal({ wristband, onClose }: OrderHistoryModalProps) {
   if (!wristband) return null;
 
-  const grandTotal = wristband.orders.reduce((acc, order) => acc + parseFloat(order.totalAmount), 0);
+  const pendingOrders = wristband.orders.filter(order => order.status !== OrderStatus.PAID);
+  const grandTotal = pendingOrders.reduce((acc, order) => acc + parseFloat(order.totalAmount), 0);
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50" onClick={onClose}>
       <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg w-full max-w-3xl" onClick={e => e.stopPropagation()}>
         <h2 className="text-2xl font-bold mb-2">Histórico de Consumo</h2>
-        <p className="text-lg text-amber-400 mb-6">{wristband.code}</p>
+        <p className="text-lg text-amber-400 mb-6">Pulseira: {wristband.code}</p>
 
         <div className="max-h-[60vh] overflow-y-auto pr-3 space-y-6 mb-6">
-          {wristband.orders.length > 0 ? (
+          {pendingOrders.length > 0 ? (
             <>
-              <p className="text-md font-semibold mb-3 text-gray-300">Consumo:</p>
+              <p className="text-md font-semibold mb-3 text-gray-300">Consumo Pendente:</p>
               <ul className="space-y-2">
-                {wristband.orders.map((order) => (
+                {pendingOrders.map((order) => (
                   <li key={order.id} className="bg-gray-700/50 px-4 py-1 rounded-lg">
                     <ul>
                       {order.orderItems.map(item => (
@@ -66,18 +77,20 @@ export function OrderHistoryModal({ wristband, onClose }: OrderHistoryModalProps
               </ul>
             </>
           ) : (
-            <p className="text-center text-gray-400 py-8">Nenhum consumo registrado para esta pulseira.</p>
+            <p className="text-center text-gray-400 py-8">Nenhum consumo pendente para esta pulseira.</p>
           )}
         </div>
 
         <div className="border-t border-gray-600 pt-4 flex justify-between items-center text-2xl font-bold text-white">
-          <span>Gasto Total:</span>
+          <span>Total Pendente:</span>
           <span className='font-mono'>R$ {grandTotal.toFixed(2)}</span>
         </div>
 
         <div className="mt-8 text-center flex gap-2">
           <Button onClick={onClose} className="p-4 text-md bg-blue-600 hover:bg-blue-700">Sair</Button>
-          <Button onClick={onClose} className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
+          {grandTotal > 0 && (
+            <Button onClick={onClose} className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
+          )}
         </div>
       </div>
     </div>
