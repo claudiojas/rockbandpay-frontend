@@ -55,12 +55,7 @@ function LoginComponent() {
           <CardTitle>Open Cash Register</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleOpenRegister()
-            }}
-          >
+          <form>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
                 <Input
@@ -72,7 +67,7 @@ function LoginComponent() {
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button type="submit">Open Register</Button>
+              <Button onClick={handleOpenRegister}>Open Register</Button>
             </div>
           </form>
         </CardContent>
