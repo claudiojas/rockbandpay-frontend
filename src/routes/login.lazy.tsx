@@ -3,8 +3,9 @@ import { useNavigate, createLazyFileRoute } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '@/lib/axios'
+import { useCashRegisterStatus } from '@/hooks/useCashRegisterStatus'
 
 export const Route = createLazyFileRoute('/login')({
   component: LoginComponent,
@@ -14,6 +15,13 @@ function LoginComponent() {
   const navigate = useNavigate()
   const [initialValue, setInitialValue] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const { isActive, isLoading } = useCashRegisterStatus();
+
+  useEffect(() => {
+    if (!isLoading && isActive) {
+      navigate({ to: '/', replace: true });
+    }
+  }, [isLoading, isActive, navigate]);
 
   const handleOpenRegister = async () => {
     try {
@@ -32,8 +40,16 @@ function LoginComponent() {
     }
   }
 
+  if (isLoading || isActive) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
+        <p className="text-2xl">Verificando status do caixa...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center h-screen bg-gray-900">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Open Cash Register</CardTitle>
