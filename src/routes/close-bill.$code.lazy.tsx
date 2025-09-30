@@ -68,7 +68,7 @@ function CloseBill() {
       setFeedbackMessage({ type: 'success', text: `✅ Conta paga com sucesso! Valor: R$ ${amount}` });
       queryClient.invalidateQueries({ queryKey: ['wristbands'] });
       queryClient.removeQueries({ queryKey: ['wristband-details', code] });
-      setTimeout(() => navigate({ to: '/wristbands-overview' }), 3000);
+      setTimeout(() => navigate({ to: '/' }), 3000);
     },
     onError: (err: any) => {
       let message = 'Ocorreu um erro no sistema. Tente novamente.';

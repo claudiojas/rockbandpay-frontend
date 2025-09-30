@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useNavigate, createLazyFileRoute } from '@tanstack/react-router'
+import { useNavigate, createLazyFileRoute, Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -50,9 +50,10 @@ function LoginComponent() {
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-900">
+    <div className="flex flex-col items-center gap-6">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Open Cash Register</CardTitle>
+          <CardTitle>Abrir Caixa</CardTitle>
         </CardHeader>
         <CardContent>
           <form>
@@ -60,18 +61,24 @@ function LoginComponent() {
               <div className="flex flex-col space-y-1.5">
                 <Input
                   id="initialValue"
-                  placeholder="Initial cash value"
+                  placeholder="Valor inicial em caixa"
                   type="number"
                   value={initialValue}
                   onChange={(e) => setInitialValue(e.target.value)}
                 />
               </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button onClick={handleOpenRegister}>Open Register</Button>
+              <Button onClick={handleOpenRegister} type="submit">Abrir Caixa</Button>
             </div>
           </form>
         </CardContent>
       </Card>
+      <Link to="/dashboard">
+        <Button variant="link" className="text-gray-300">
+            Acessar Dashboard Gerencial
+        </Button>
+      </Link>
+    </div>
     </div>
   )
 }

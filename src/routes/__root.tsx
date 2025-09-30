@@ -10,7 +10,7 @@ function RootComponent() {
   useEffect(() => {
     // Se não estiver carregando, não houver caixa ativo e não estivermos na página de login,
     // redireciona para o login.
-    if (!isLoading && !isActive && location.pathname !== '/login') {
+    if (!isLoading && !isActive && location.pathname !== '/login' && location.pathname !== '/dashboard') {
       navigate({ to: '/login', replace: true });
     }
   }, [isLoading, isActive, location.pathname, navigate]);
@@ -30,7 +30,7 @@ function RootComponent() {
     <>
       {location.pathname !== '/login' && (
          <div className='py-5 px-8 flex items-center justify-start text-white w-full bg-gray-900'>
-            <div className="w-[30%] flex items-center justify-between">
+            <div className="w-[40%] flex items-center justify-between">
               <Link to="/" className="[&.active]:font-bold hover:underline">
                 Caixa
               </Link>
@@ -40,8 +40,11 @@ function RootComponent() {
               <Link to="/wristbands" className="[&.active]:font-bold hover:underline">
                 Criar Pulseira
               </Link>
+              <Link to="/dashboard" className="[&.active]:font-bold hover:underline">
+                Dashboard
+              </Link>
               <Link to="/wristbands-overview" className="[&.active]:font-bold hover:underline">
-                Consultar Pulseiras
+                Consulta de Pulseiras
               </Link>
           </div>
         </div>

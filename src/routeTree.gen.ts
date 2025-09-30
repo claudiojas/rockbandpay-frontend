@@ -17,14 +17,12 @@ const WristbandsOverviewLazyRouteImport = createFileRoute(
 )()
 const WristbandsLazyRouteImport = createFileRoute('/wristbands')()
 const LoginLazyRouteImport = createFileRoute('/login')()
+const DashboardLazyRouteImport = createFileRoute('/dashboard')()
 const IndexLazyRouteImport = createFileRoute('/')()
 const ProductsAddLazyRouteImport = createFileRoute('/products/add')()
 const CloseBillCodeLazyRouteImport = createFileRoute('/close-bill/$code')()
 const CashRegisterCloseLazyRouteImport = createFileRoute(
   '/cash-register/close',
-)()
-const WristbandsCodeCloseLazyRouteImport = createFileRoute(
-  '/wristbands/$code/close',
 )()
 
 const WristbandsOverviewLazyRoute = WristbandsOverviewLazyRouteImport.update({
@@ -44,6 +42,11 @@ const LoginLazyRoute = LoginLazyRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
+const DashboardLazyRoute = DashboardLazyRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/dashboard.lazy').then((d) => d.Route))
 const IndexLazyRoute = IndexLazyRouteImport.update({
   id: '/',
   path: '/',
@@ -68,82 +71,76 @@ const CashRegisterCloseLazyRoute = CashRegisterCloseLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/cash-register.close.lazy').then((d) => d.Route),
 )
-const WristbandsCodeCloseLazyRoute = WristbandsCodeCloseLazyRouteImport.update({
-  id: '/$code/close',
-  path: '/$code/close',
-  getParentRoute: () => WristbandsLazyRoute,
-} as any).lazy(() =>
-  import('./routes/wristbands.$code.close.lazy').then((d) => d.Route),
-)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
+  '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRouteWithChildren
+  '/wristbands': typeof WristbandsLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
-  '/wristbands/$code/close': typeof WristbandsCodeCloseLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
+  '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRouteWithChildren
+  '/wristbands': typeof WristbandsLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
-  '/wristbands/$code/close': typeof WristbandsCodeCloseLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
+  '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRouteWithChildren
+  '/wristbands': typeof WristbandsLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
-  '/wristbands/$code/close': typeof WristbandsCodeCloseLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/login'
     | '/wristbands'
     | '/wristbands-overview'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
-    | '/wristbands/$code/close'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/login'
     | '/wristbands'
     | '/wristbands-overview'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
-    | '/wristbands/$code/close'
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/login'
     | '/wristbands'
     | '/wristbands-overview'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
-    | '/wristbands/$code/close'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  DashboardLazyRoute: typeof DashboardLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
-  WristbandsLazyRoute: typeof WristbandsLazyRouteWithChildren
+  WristbandsLazyRoute: typeof WristbandsLazyRoute
   WristbandsOverviewLazyRoute: typeof WristbandsOverviewLazyRoute
   CashRegisterCloseLazyRoute: typeof CashRegisterCloseLazyRoute
   CloseBillCodeLazyRoute: typeof CloseBillCodeLazyRoute
@@ -171,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -201,32 +205,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CashRegisterCloseLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/wristbands/$code/close': {
-      id: '/wristbands/$code/close'
-      path: '/$code/close'
-      fullPath: '/wristbands/$code/close'
-      preLoaderRoute: typeof WristbandsCodeCloseLazyRouteImport
-      parentRoute: typeof WristbandsLazyRoute
-    }
   }
 }
 
-interface WristbandsLazyRouteChildren {
-  WristbandsCodeCloseLazyRoute: typeof WristbandsCodeCloseLazyRoute
-}
-
-const WristbandsLazyRouteChildren: WristbandsLazyRouteChildren = {
-  WristbandsCodeCloseLazyRoute: WristbandsCodeCloseLazyRoute,
-}
-
-const WristbandsLazyRouteWithChildren = WristbandsLazyRoute._addFileChildren(
-  WristbandsLazyRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  DashboardLazyRoute: DashboardLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
-  WristbandsLazyRoute: WristbandsLazyRouteWithChildren,
+  WristbandsLazyRoute: WristbandsLazyRoute,
   WristbandsOverviewLazyRoute: WristbandsOverviewLazyRoute,
   CashRegisterCloseLazyRoute: CashRegisterCloseLazyRoute,
   CloseBillCodeLazyRoute: CloseBillCodeLazyRoute,
