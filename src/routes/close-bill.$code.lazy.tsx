@@ -21,11 +21,24 @@ interface OrderItem {
   product: Product;
 }
 
+const OrderStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  PREPARING: 'PREPARING',
+  READY: 'READY',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED',
+  PAID: 'PAID',
+} as const;
+
+type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+
 interface Order {
   id: string;
   totalAmount: string;
   orderItems: OrderItem[];
   wristbandId: string;
+  status: OrderStatus;
 }
 
 const paymentOptions = [
@@ -96,8 +109,10 @@ function CloseBill() {
   if (isLoading) return <div className="p-6 text-white">Carregando detalhes da conta...</div>;
   if (error) return <div className="p-6 text-red-500">Erro ao carregar detalhes: {error.message}</div>;
 
-  const allItems = orders?.flatMap(order => order.orderItems || []).filter(Boolean) ?? [];
-  const grandTotal = orders?.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0) ?? 0;
+  const pendingOrders = orders?.filter(order => order.status !== 'PAID');
+
+  const allItems = pendingOrders?.flatMap(order => order.orderItems || []).filter(Boolean) ?? [];
+  const grandTotal = pendingOrders?.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0) ?? 0;
 
   if (feedbackMessage) {
     return (

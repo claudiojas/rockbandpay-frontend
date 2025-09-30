@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Link } from '@tanstack/react-router';
 
 const OrderStatus = {
   PENDING: 'PENDING',
@@ -89,7 +90,9 @@ export function OrderHistoryModal({ wristband, onClose }: OrderHistoryModalProps
         <div className="mt-8 text-center flex gap-2">
           <Button onClick={onClose} className="p-4 text-md bg-blue-600 hover:bg-blue-700">Sair</Button>
           {grandTotal > 0 && (
-            <Button onClick={onClose} className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
+            <Link to="/close-bill/$code" params={{ code: wristband.code }}>
+              <Button className="p-4 text-md bg-green-600 hover:bg-green-700">Fechar conta</Button>
+            </Link>
           )}
         </div>
       </div>
