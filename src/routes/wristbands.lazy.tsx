@@ -34,11 +34,11 @@ function Wristbands() {
 
   return (
     <div className="p-4 font-sans flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-      <h2 className="text-2xl font-bold mb-4">Criar Nova Pulseira</h2>
+      <h2 className="text-2xl font-bold mb-4">Adicionar nova mesa</h2>
       <form onSubmit={handleCreateWristband} className="max-w-sm">
         <div className="mb-4">
           <label htmlFor="wristband-code" className="block mb-1 font-medium">
-            Código da Pulseira:
+            Código da Mesa:
           </label>
           <input
             id="wristband-code"
@@ -66,7 +66,7 @@ function Wristbands() {
           type="submit"
           className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Criar Pulseira
+          Criar Mesa
         </button>
       </form>
       {message && <p className="mt-4 text-sm text-gray-600">{message}</p>}
