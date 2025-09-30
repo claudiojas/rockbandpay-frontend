@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useWristbands } from '@/hooks/useWristbands';
 
 interface Product {
   id: string;
@@ -33,6 +34,17 @@ export function OrderSummary({
     handleFinalizeOrder,
     isSubmitting
 }: OrderSummaryProps) {
+
+    const { wristbands, isLoading: isLoadingWristbands } = useWristbands();
+
+    const handleValueChange = (value: string) => {
+        if (value === 'none') {
+            setWristbandCode('');
+        } else {
+            setWristbandCode(value);
+        }
+    }
+
     return (
         <div className="flex-1 h-fit sticky top-8">
         <Card className="bg-gray-800 border-gray-700 text-white">
@@ -43,15 +55,29 @@ export function OrderSummary({
             <div className="mb-4 space-y-2">
               <label htmlFor="wristband-code" className="font-medium text-gray-300">Código da Mesa</label>
               <div className="flex gap-2">
-                <Input
-                  id="wristband-code"
-                  type="text"
+                <Select
                   value={wristbandCode}
-                  onChange={(e) => setWristbandCode(e.target.value)}
-                  className="bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500"
-                  placeholder="Ex: cliente001"
-                  disabled={isSubmitting}
-                />
+                  onValueChange={handleValueChange}
+                  disabled={isSubmitting || isLoadingWristbands}
+                >
+                  <SelectTrigger id="wristband-code" className="w-full bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500">
+                    <SelectValue placeholder="Selecione uma mesa/pulseira..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 text-white border-gray-600">
+                    {isLoadingWristbands ? (
+                      <SelectItem value="loading" disabled>Carregando...</SelectItem>
+                    ) : (
+                      <>
+                        <SelectItem value="none" className="hover:bg-gray-600">Nenhum</SelectItem>
+                        {wristbands?.map(wristband => (
+                          <SelectItem key={wristband.id} value={wristband.code} className="hover:bg-gray-600">
+                            {wristband.code}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
                 <Button onClick={handleCheckConsumption} disabled={!wristbandCode || isLoadingConsumption} className="bg-purple-600 hover:bg-purple-700">
                   {isLoadingConsumption ? '...' : 'Ver'}
                 </Button>
