@@ -55,6 +55,10 @@ interface Order {
   status: OrderStatus;
 }
 
+interface WristbandWithDetails extends Wristband {
+  orders: Order[];
+}
+
 export const Route = createLazyFileRoute('/wristbands-overview')({
   component: WristbandsOverview,
 })
@@ -62,26 +66,37 @@ export const Route = createLazyFileRoute('/wristbands-overview')({
 function WristbandsOverview () {
   const [selectedWristbandCode, setSelectedWristbandCode] = useState<string | null>(null)
 
-  const { data: wristbands, isLoading: isLoadingWristbands, error: errorWristbands } = useQuery<Wristband[]> ({
-    queryKey: ['wristbands'],
+  const { data: wristbandsWithDetails, isLoading, error } = useQuery<WristbandWithDetails[], Error>({
+    queryKey: ['wristbands-with-details'],
     queryFn: async () => {
-      const response = await api.get('/wristbands')
-      return response.data
-    },
-  })
+      const wristbandsResponse = await api.get<Wristband[]>('/wristbands');
+      if (!wristbandsResponse.data) return [];
 
-  const { data: orders, isLoading: isLoadingOrders, error: errorOrders } = useQuery<Order[]> ({
-    queryKey: ['wristband-details', selectedWristbandCode],
-    queryFn: async () => {
-      if (!selectedWristbandCode) return []
-      const response = await api.get<{ orders: Order[] }>(`/wristbands/${selectedWristbandCode}`)
-      return response.data.orders
+      const detailedWristbands = await Promise.all(
+        wristbandsResponse.data.map(async (wristband) => {
+          try {
+            const detailsResponse = await api.get<{ orders: Order[] }>(`/wristbands/${wristband.code}`);
+            return { ...wristband, orders: detailsResponse.data.orders || [] };
+          } catch (error) {
+            console.error(`Failed to fetch details for wristband ${wristband.code}`, error);
+            return { ...wristband, orders: [] };
+          }
+        })
+      );
+      return detailedWristbands;
     },
-    enabled: !!selectedWristbandCode,
-  })
+  });
 
-  if (isLoadingWristbands) return <div className="p-6 text-dark-text-primary">Carregando pulseiras...</div>
-  if (errorWristbands) return <div className="p-6 text-red-500">Erro ao carregar pulseiras: {errorWristbands.message}</div>
+  const wristbandsWithUnpaidOrders = wristbandsWithDetails?.filter(
+    (w) => w.orders.some((o) => o.status !== OrderStatus.PAID)
+  );
+
+  const selectedWristbandOrders = wristbandsWithDetails?.find(
+    (w) => w.code === selectedWristbandCode
+  )?.orders;
+
+  if (isLoading) return <div className="p-6 text-dark-text-primary">Carregando mesas...</div>
+  if (error) return <div className="p-6 text-red-500">Erro ao carregar mesas: {error.message}</div>
 
   return (
     <div className="p-6 bg-gray-900 text-white dark:bg-dark-bg-primary min-h-screen">
@@ -90,19 +105,18 @@ function WristbandsOverview () {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Lista de Pulseiras */}
         <div>
-          <h2 className="text-2xl font-bold mb-4 dark:text-dark-text-primary">Todas as Mesas</h2>
+          <h2 className="text-2xl font-bold mb-4 dark:text-dark-text-primary">Mesas com Pendências</h2>
           <ul className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6 space-y-3">
-            {wristbands?.map((wristband) => (
+            {wristbandsWithUnpaidOrders?.map((wristband) => (
               <li
                 key={wristband.id}
                 className={`p-4 rounded-md cursor-pointer transition-colors duration-200 ${
                   selectedWristbandCode === wristband.code
-                    ? 'bg-dark-accent text-white shadow-md'
+                    ? 'bg-dark-accent text-green-700 shadow-md'
                     : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-dark-text-primary'
                 }`}
                 onClick={() => setSelectedWristbandCode(wristband.code)}
               >
-                {/* Exibindo apenas o código, como solicitado */}
                 <p className="font-semibold text-lg">Código: {wristband.code}</p>
               </li>
             ))}
@@ -110,15 +124,13 @@ function WristbandsOverview () {
         </div>
 
         {/* Detalhes do Consumo da Pulseira Selecionada */}
-        <div>
+        <div className='fixed top-28 right-6 w-2/5'>
           <h2 className="text-2xl font-bold mb-4 dark:text-dark-text-primary">Consumo da Mesa Selecionada</h2>
           {selectedWristbandCode ? (
             <>
-              {isLoadingOrders && <p className="text-dark-text-primary">Carregando consumo...</p>}
-              {errorOrders && <p className="text-red-500">Erro ao carregar consumo: {errorOrders.message}</p>}
-              {orders && (
+              {selectedWristbandOrders && (
                 (() => {
-                  const pendingOrders = orders.filter(order => order.status !== OrderStatus.PAID);
+                  const pendingOrders = selectedWristbandOrders.filter(order => order.status !== OrderStatus.PAID);
                   const allItems = pendingOrders.flatMap(order => order.orderItems || []).filter(Boolean);
                   const grandTotal = pendingOrders.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0);
 
@@ -161,7 +173,7 @@ function WristbandsOverview () {
                   )
                 })()
               )}
-              {!isLoadingOrders && !orders?.some(order => order.status !== OrderStatus.PAID) && (
+              {!isLoading && selectedWristbandCode && !selectedWristbandOrders?.some(order => order.status !== OrderStatus.PAID) && (
                  <div className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6">
                     <p className="text-gray-600 dark:text-dark-text-secondary">Nenhum consumo pendente para esta pulseira.</p>
                 </div>
