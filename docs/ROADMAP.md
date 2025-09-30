@@ -38,28 +38,34 @@ O objetivo desta fase é ter um ambiente de desenvolvimento funcional e as opera
 
 ---
 
-## Fase 2: Desenvolvimento do Frontend
+## Fase 2: Desenvolvimento do Frontend (Concluída)
 
-O objetivo é criar a interface que será usada para gerenciar os pedidos.
+O objetivo foi criar a interface que será usada para gerenciar os pedidos.
+
+### Concluído
 
 1.  **Estruturar o Projeto Frontend:**
-    *   O diretório `frontend` está vazio. Precisamos iniciar um projeto nele. Sugestão: **React com TypeScript**.
-    *   Configurar a comunicação com a API do backend.
+    *   O diretório `frontend` foi iniciado com **React com TypeScript**.
+    *   A comunicação com a API do backend foi configurada.
 
 2.  **Desenvolver as Telas Principais:**
-    *   **Tela de "Caixa" / Registro de Pedidos:**
-        *   Interface para selecionar uma pulseira (seja digitando o código ou, no futuro, escaneando um QR code).
-        *   Visualização do cardápio de produtos (puxados da API).
-        *   Funcionalidade para adicionar itens ao pedido da pulseira selecionada.
-    *   **Tela de Consulta e Pagamento:**
-        *   Uma tela para buscar uma pulseira e ver todo o consumo detalhado.
-        *   Botão para "Fechar a Conta", que irá interagir com a API de pagamento.
+    *   **Tela de "Caixa" / Registro de Pedidos:** Interface para registrar pedidos.
+    *   **Tela de Consulta e Pagamento:** Tela para consultar e pagar contas.
+    *   **Telas de Gerenciamento:** Telas para gerenciar produtos e pulseiras.
+    *   **Tela de Fechamento de Caixa:** Tela com o resumo do dia para o operador.
 
 ---
 
-## Fase 3: Lógica de Negócio e Integrações
+## Fase 3: Lógica de Negócio e Experiência do Usuário
 
-O foco aqui é refinar as regras de negócio e integrar com serviços externos.
+O foco aqui é refinar as regras de negócio e a experiência do usuário.
+
+### Em Andamento
+
+1.  **Refinar a Experiência do Usuário:**
+    *   **Dashboard Gerencial:** Implementação de uma tela com métricas e gráficos de vendas. (Concluído)
+
+### Próximos Passos
 
 1.  **Implementar a Lógica de Pagamento no Backend:**
     *   Criar a rota `POST /payments` que calcula o total de um pedido.
