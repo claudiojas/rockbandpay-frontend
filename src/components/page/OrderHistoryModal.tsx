@@ -1,45 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
+import type { IWristbandWithDetails } from '@/types';
 
-const OrderStatus = {
-  PENDING: 'PENDING',
-  CONFIRMED: 'CONFIRMED',
-  PREPARING: 'PREPARING',
-  READY: 'READY',
-  DELIVERED: 'DELIVERED',
-  CANCELLED: 'CANCELLED',
-  PAID: 'PAID',
-} as const;
 
-type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
-
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-}
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  unitPrice: string;
-  totalPrice: string;
-  product: Product;
-}
-
-interface IOrder {
-  id: string;
-  status: OrderStatus;
-  totalAmount: string;
-  createdAt: string;
-  orderItems: OrderItem[];
-}
-
-interface IWristbandWithDetails {
-  id: string;
-  code: string;
-  orders: IOrder[];
-}
 
 interface OrderHistoryModalProps {
   wristband: IWristbandWithDetails | null;
@@ -49,7 +12,7 @@ interface OrderHistoryModalProps {
 export function OrderHistoryModal({ wristband, onClose }: OrderHistoryModalProps) {
   if (!wristband) return null;
 
-  const pendingOrders = wristband.orders.filter(order => order.status !== OrderStatus.PAID);
+  const pendingOrders = wristband.orders.filter(order => order.status !== 'PAID');
   const grandTotal = pendingOrders.reduce((acc, order) => acc + parseFloat(order.totalAmount), 0);
 
   return (

@@ -4,46 +4,13 @@ import { useMemo, useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
 import { api } from '../lib/axios';
+import type { Product, IWristbandWithDetails, IOrder } from '../types';
 
 import { Button } from '@/components/ui/button';
 import { MenuList } from '@/components/page/MenuList';
 import { OrderSummary } from '@/components/page/OrderSummary';
 import { ProductModal } from '@/components/page/ProductModal';
 import { OrderHistoryModal } from '@/components/page/OrderHistoryModal';
-
-// Interfaces
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  description: string | null;
-  categoryId: string;
-}
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  unitPrice: string;
-  totalPrice: string;
-  product: Product;
-}
-
-type OrderStatus = 'PENDING' | 'COMPLETED' | 'CANCELED';
-
-interface IOrder {
-  id: string;
-  status: OrderStatus;
-  totalAmount: string;
-  createdAt: string;
-  orderItems: OrderItem[];
-}
-
-interface IWristbandWithDetails {
-  id: string;
-  code: string;
-  orders: IOrder[];
-}
-
 
 export const Route = createLazyFileRoute('/')({
   component: Index,

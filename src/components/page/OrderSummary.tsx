@@ -2,14 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useWristbands } from '@/hooks/useWristbands';
-
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  description: string | null;
-  categoryId: string;
-}
+import type { Product } from '@/types';
 
 interface OrderSummaryProps {
     wristbandCode: string;

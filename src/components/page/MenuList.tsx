@@ -1,15 +1,10 @@
+
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUpdateProductStatus } from '@/hooks/useProducts';
+import type { Product } from '@/types';
 
 // Interfaces
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  description: string | null;
-  categoryId: string;
-}
-
 interface Category {
   id: string;
   name: string;
@@ -34,8 +29,14 @@ export function MenuList({
   setSearchTerm,
   selectedCategoryId,
   setSelectedCategoryId,
-  onProductClick,
+  onProductClick
 }: MenuListProps) {
+  const updateProductStatus = useUpdateProductStatus();
+
+  const handleStatusChange = (product: Product) => {
+    updateProductStatus.mutate({ productId: product.id, isSoldOut: product.isSoldOut });
+  };
+
   return (
     <div className="flex-[3]">
       <h2 className="text-3xl font-bold mb-6 text-gray-50">Cardápio</h2>
@@ -65,15 +66,51 @@ export function MenuList({
           <div key={categoryName} className="mb-8">
             <h3 className="text-2xl font-bold mt-6 mb-4 text-amber-400 border-b-2 border-amber-400/30 pb-2">{categoryName}</h3>
             <ul className="space-y-2">
-              {productsInCategory.map(product => (
-                <li
-                  key={product.id}
-                  onClick={() => onProductClick(product)}
-                  className="cursor-pointer p-3 rounded-md hover:bg-gray-700/50 flex justify-between items-center transition-colors duration-200"
-                >
-                  <span className="text-lg">{product.name}</span>
-                  <span className="font-semibold text-emerald-400 text-lg">R$ {parseFloat(product.price).toFixed(2)}</span>
-                </li>
+              {productsInCategory
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(product => (
+                  <li
+                    key={product.id}
+                    onClick={() => !product.isSoldOut && onProductClick(product)}
+                    className={`p-3 rounded-md flex justify-between items-center transition-colors duration-200 ${
+                      product.isSoldOut
+                        ? 'bg-gray-800/50 opacity-50 cursor-not-allowed'
+                        : 'cursor-pointer hover:bg-gray-700/50'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <span className="text-lg">{product.name}</span>
+                      {product.isSoldOut && (
+                        <span className="ml-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">ESGOTADO</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`font-semibold text-lg ${product.isSoldOut ? 'text-gray-500' : 'text-emerald-400'}`}>
+                        R$ {parseFloat(product.price).toFixed(2)}
+                      </span>
+                      <div className="relative group">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(product);
+                          }}
+                          disabled={updateProductStatus.isPending}
+                          className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-200 cursor-pointer ${
+                            product.isSoldOut
+                              ? 'bg-green-500 hover:bg-green-600'
+                              : 'bg-yellow-500 hover:bg-yellow-600'
+                          }`}
+                        >
+                          <span className="text-white font-bold text-xl">
+                            {product.isSoldOut ? '+' : '-'}
+                          </span>
+                        </button>
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                          {product.isSoldOut ? 'Marcar como disponível' : 'Marcar como esgotado'}
+                        </div>
+                      </div>
+                    </div>
+                  </li>
               ))}
             </ul>
           </div>

@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-// Interfaces should ideally be in a central file (e.g., src/interfaces/Product.ts)
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  description: string | null;
-  categoryId: string;
-}
+import type { Product } from '@/types';
 
 interface ProductModalProps {
   product: Product;
