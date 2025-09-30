@@ -19,7 +19,7 @@ export function OrderHistoryModal({ wristband, onClose }: OrderHistoryModalProps
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50" onClick={onClose}>
       <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg w-full max-w-3xl" onClick={e => e.stopPropagation()}>
         <h2 className="text-2xl font-bold mb-2">Histórico de Consumo</h2>
-        <p className="text-lg text-amber-400 mb-6">Pulseira: {wristband.code}</p>
+        <p className="text-lg text-amber-400 mb-6">Mesa: {wristband.code}</p>
 
         <div className="max-h-[60vh] overflow-y-auto pr-3 space-y-6 mb-6">
           {pendingOrders.length > 0 ? (
@@ -41,7 +41,7 @@ export function OrderHistoryModal({ wristband, onClose }: OrderHistoryModalProps
               </ul>
             </>
           ) : (
-            <p className="text-center text-gray-400 py-8">Nenhum consumo pendente para esta pulseira.</p>
+            <p className="text-center text-gray-400 py-8">Nenhum consumo pendente para esta mesa.</p>
           )}
         </div>
 

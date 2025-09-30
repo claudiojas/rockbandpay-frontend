@@ -38,13 +38,13 @@ function RootComponent() {
                 Adicionar Produto
               </Link>
               <Link to="/wristbands" className="[&.active]:font-bold hover:underline">
-                Criar Pulseira
+                Adicionar uma mesa
               </Link>
               <Link to="/dashboard" className="[&.active]:font-bold hover:underline">
                 Dashboard
               </Link>
               <Link to="/wristbands-overview" className="[&.active]:font-bold hover:underline">
-                Consulta de Pulseiras
+                Consulta de Mesas
               </Link>
           </div>
         </div>
