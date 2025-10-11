@@ -29,6 +29,7 @@ interface Wristband {
   id: string
   code: string
   qrCode: string
+  isActive: boolean;
   createdAt: string
   updatedAt: string
 }
@@ -103,8 +104,10 @@ function WristbandsOverview () {
   };
 
   const wristbandsWithUnpaidOrders = wristbandsWithDetails?.filter(
-    (w) => w.orders.some((o) => o.status !== OrderStatus.PAID)
+    (w) => w.isActive && w.orders.some((o) => o.status !== OrderStatus.PAID)
   );
+
+  const activeWristbands = wristbandsWithDetails?.filter((w) => w.isActive);
 
   const selectedWristbandOrders = wristbandsWithDetails?.find(
     (w) => w.code === selectedWristbandCode
@@ -212,7 +215,7 @@ function WristbandsOverview () {
           <h2 className="text-2xl font-bold mb-4 dark:text-dark-text-primary">Todas as Mesas</h2>
           <div className="max-h-[80vh] overflow-y-auto">
             <ul className="bg-white dark:bg-dark-bg-secondary shadow-xl rounded-lg p-6 space-y-3">
-              {wristbandsWithDetails?.map((wristband) => (
+              {activeWristbands?.map((wristband) => (
                 <li 
                   key={wristband.id}
                   className="p-4 rounded-md flex justify-between items-center bg-gray-100 dark:bg-gray-700"
