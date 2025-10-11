@@ -1,5 +1,5 @@
 import { createLazyFileRoute, Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/axios'
 import { useState } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -66,6 +66,7 @@ export const Route = createLazyFileRoute('/wristbands-overview')({
 function WristbandsOverview () {
   const [selectedWristbandCode, setSelectedWristbandCode] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState('pending'); // 'pending' or 'all'
+  const queryClient = useQueryClient();
 
   const { data: wristbandsWithDetails, isLoading, error } = useQuery<WristbandWithDetails[], Error>({
     queryKey: ['wristbands-with-details'],
@@ -87,6 +88,19 @@ function WristbandsOverview () {
       return detailedWristbands;
     },
   });
+
+  const deleteWristbandMutation = useMutation({
+    mutationFn: (wristbandId: string) => api.delete(`/wristbands/${wristbandId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wristbands-with-details'] });
+    },
+  });
+
+  const handleDelete = (wristbandId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta mesa?')) {
+      deleteWristbandMutation.mutate(wristbandId);
+    }
+  };
 
   const wristbandsWithUnpaidOrders = wristbandsWithDetails?.filter(
     (w) => w.orders.some((o) => o.status !== OrderStatus.PAID)
@@ -201,13 +215,16 @@ function WristbandsOverview () {
               {wristbandsWithDetails?.map((wristband) => (
                 <li 
                   key={wristband.id}
-                  className={`p-4 rounded-md cursor-pointer transition-colors duration-200 ${
-                    selectedWristbandCode === wristband.code
-                      ? 'bg-dark-accent text-green-700 shadow-md'
-                      : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-dark-text-primary'
-                  }`}
+                  className="p-4 rounded-md flex justify-between items-center bg-gray-100 dark:bg-gray-700"
                 >
-                  Código: {wristband.code}
+                  <p className="font-semibold text-lg text-gray-900 dark:text-dark-text-primary">Código: {wristband.code}</p>
+                  <Button
+                    onClick={() => handleDelete(wristband.id)}
+                    className="p-2 text-sm bg-red-600 hover:bg-red-700"
+                    disabled={deleteWristbandMutation.isPending}
+                  >
+                    Excluir
+                  </Button>
                 </li>
               ))}
             </ul>
