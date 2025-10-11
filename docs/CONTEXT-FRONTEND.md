@@ -4,9 +4,9 @@ Este documento serve como um ponto de sincronia para desenvolvedores (humanos ou
 
 ## 1. Ponto Atual do Desenvolvimento
 
-O frontend está **funcionalmente completo** para o fluxo de trabalho do operador de caixa. Todas as principais funcionalidades, desde a abertura do caixa até o registro de vendas e o fechamento do dia, estão implementadas e operacionais.
+O frontend está **funcionalmente completo para o MVP (Produto Mínimo Viável)** de instância única. O fluxo de trabalho do operador de caixa, incluindo funcionalidades gerenciais como o dashboard e o gerenciamento de mesas/pedidos, está implementado e operacional.
 
-O foco atual é a adição de uma nova tela de **Dashboard Gerencial**, que fornecerá análises de vendas para proprietários e gerentes.
+**Visão Futura:** O próximo grande passo para o projeto é a transição para uma **arquitetura SaaS (Software as a Service)**. No frontend, isso impactará principalmente o fluxo de autenticação, exigindo a criação de telas de cadastro de empresas (tenants) e um sistema de login que se comunique com a nova API multi-tenant do backend.
 
 ## 2. Funcionalidades Desenvolvidas
 

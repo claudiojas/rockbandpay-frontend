@@ -1,77 +1,40 @@
-# Roadmap de Desenvolvimento - RockBandPay
+# Roadmap de Desenvolvimento - RockBandPay Frontend
 
 ---
 
-## Fase 1: Finalizar a Configuração e a Base do Backend
+## Fase 1: MVP do Operador de Caixa (Concluída)
 
-O objetivo desta fase é ter um ambiente de desenvolvimento funcional e as operações básicas do banco de dados prontas.
+O objetivo desta fase foi criar uma interface de usuário completamente funcional para o fluxo de trabalho diário de um operador de caixa. Todas as funcionalidades essenciais, desde o login e abertura de caixa até o lançamento de pedidos, gerenciamento de mesas/produtos e fechamento de conta/caixa, foram implementadas.
 
-### Concluído
+### Funcionalidades Concluídas:
 
-1.  **Configurar o Banco de Dados:**
-    *   Instalação do PostgreSQL.
-    *   Criação do banco de dados da aplicação.
-    *   Configuração da `DATABASE_URL` no arquivo `.env`.
-
-2.  **Aplicar o Schema no Banco:**
-    *   Execução do comando `npx prisma migrate dev` para criar as tabelas iniciais.
-
-3.  **Implementação de Rotas da API:**
-    *   **Gerenciamento de Produtos:**
-        *   `POST /products` (para criar um produto)
-        *   `GET /products` (para listar todos os produtos)
-        *   `PUT /products/:id` (para atualizar um produto)
-        *   `GET /categories/:id/products` (para listar produtos de uma categoria)
-    *   **Gerenciamento de Categorias:**
-        *   `POST /categorie` (para criar uma categoria)
-    *   **Gerenciamento de Pulseiras (Wristbands):**
-        *   `POST /wristbands` (para registrar uma nova pulseira)
-        *   `GET /wristbands/:code` (para consultar uma pulseira pelo código)
-    *   **Gerenciamento de Pedidos (Orders):**
-        *   `POST /orders` (para criar um novo pedido associado a uma pulseira)
-        *   `GET /orders/:wristbandId` (para ver o consumo de uma pulseira)
-        *   `POST /orders/:orderId/items` (para adicionar itens a um pedido)
-
-4.  **Garantia de Qualidade e Documentação:**
-    *   Criação de suíte de testes automatizados para todas as rotas da API da Fase 1.
-    *   Criação do arquivo `README.md` com a documentação completa do projeto.
+1.  **Estrutura do Projeto:** Configuração do ambiente com React, TypeScript, Vite e TanStack.
+2.  **Telas Principais:**
+    *   Tela de Abertura de Caixa (`/login`)
+    *   Ponto de Venda (PDV) (`/`)
+    *   Gerenciamento de Produtos e Pulseiras (`/products/add`, `/wristbands`)
+    *   Fechamento de Conta do Cliente (`/close-bill/:code`)
+    *   Fechamento de Caixa do Operador (`/cash-register/close`)
+3.  **Funcionalidades de Gerenciamento e UX:**
+    *   Dashboard Gerencial com métricas de vendas (`/dashboard`).
+    *   Tela de Consulta de Mesas (`/wristbands-overview`) com:
+        *   Alternância de visualização (pendentes vs. todas).
+        *   Exclusão de pedidos (hard delete).
+        *   Desativação de mesas (soft delete).
 
 ---
 
-## Fase 2: Desenvolvimento do Frontend (Concluída)
+## Fase 2: Adaptação para Plataforma SaaS (Próximo Passo)
 
-O objetivo foi criar a interface que será usada para gerenciar os pedidos.
+**Visão:** Alinhar o frontend com a nova arquitetura multi-tenant do backend.
 
-### Concluído
+### Itens a Desenvolver:
 
-1.  **Estruturar o Projeto Frontend:**
-    *   O diretório `frontend` foi iniciado com **React com TypeScript**.
-    *   A comunicação com a API do backend foi configurada.
+1.  **Novo Fluxo de Cadastro e Login:**
+    *   Criar uma tela de **cadastro de empresa (tenant)**, que será o primeiro passo para um novo cliente usar o serviço.
+    *   Ajustar a tela de login para autenticar no sistema mestre do backend, que gerencia todos os tenants.
+    *   Implementar a lógica para lidar com subdomínios ou rotas específicas de cada tenant (ex: `cliente-a.rockbandpay.com` ou `rockbandpay.com/cliente-a`).
 
-2.  **Desenvolver as Telas Principais:**
-    *   **Tela de "Caixa" / Registro de Pedidos:** Interface para registrar pedidos.
-    *   **Tela de Consulta e Pagamento:** Tela para consultar e pagar contas.
-    *   **Telas de Gerenciamento:** Telas para gerenciar produtos e pulseiras.
-    *   **Tela de Fechamento de Caixa:** Tela com o resumo do dia para o operador.
-
----
-
-## Fase 3: Lógica de Negócio e Experiência do Usuário (Concluída)
-
-O foco aqui foi refinar as regras de negócio e a experiência do usuário.
-
-### Concluído
-
-1.  **Refinar a Experiência do Usuário:**
-    *   **Dashboard Gerencial:** Implementação de uma tela com métricas e gráficos de vendas.
-    *   **Gerenciamento de Pedidos e Mesas:** Adicionada a funcionalidade de exclusão de pedidos e desativação de mesas na tela de consulta, tornando o fluxo do operador mais flexível e à prova de erros.
-
-### Próximos Passos
-
-1.  **Implementar a Lógica de Pagamento no Backend:**
-    *   Criar a rota `POST /payments` que calcula o total de um pedido.
-    *   Integrar com uma API de pagamentos (como a do PIX).
-
-2.  **Refinar a Experiência do Usuário:**
-    *   No frontend, criar a interface para exibir o QR code do PIX ou processar o pagamento com cartão.
-    *   Implementar feedback visual para o status do pedido e do pagamento.
+2.  **Ajustes Gerais na Aplicação:**
+    *   Garantir que o token de autenticação (JWT, por exemplo) obtido após o login seja enviado em todas as requisições subsequentes à API.
+    *   O restante da aplicação deve continuar funcionando como está, pois a API se encarregará de direcionar as requisições para o banco de dados correto do tenant. O frontend não precisará saber qual banco de dados está sendo usado.

@@ -2,17 +2,13 @@
 
 Este arquivo resume as decisões, a arquitetura e o progresso do desenvolvimento do projeto RockBandPay, cobrindo tanto o backend quanto o frontend.
 
-## Fase 3: Funcionalidades Gerenciais e Refinamento da UX (Concluído)
+## Visão e Estado Atual
 
-O dashboard gerencial (`/dashboard`) foi implementado e a experiência de usuário do operador foi refinada com funcionalidades essenciais de gerenciamento.
+**MVP Concluído:** O sistema atingiu um estado de **Produto Mínimo Viável (MVP)** robusto, com o fluxo completo para um operador de caixa, incluindo funcionalidades gerenciais como dashboard, exclusão de pedidos e desativação de mesas.
 
-- **Dashboard:** A tela com métricas e gráficos de vendas está funcional.
-- **Gerenciamento de Mesas (`/wristbands-overview`):**
-  - Adicionada a capacidade de alternar entre a visualização de mesas com pendências e todas as mesas ativas.
-  - Implementada a exclusão de pedidos (hard delete) para corrigir erros de lançamento.
-  - Implementada a desativação de mesas (soft delete) para removê-las de uso sem perder o histórico.
+**Novo Objetivo Estratégico:** Transformar o RockBandPay em uma plataforma **SaaS (Software as a Service)** com arquitetura multi-tenant (um banco de dados por cliente).
 
-**Próximo Passo:** Seguir para a próxima fase do roadmap ou aguardar novas instruções.
+**Próximo Passo:** Iniciar a Fase 3 de desenvolvimento, focada na refatoração do backend para suportar a nova arquitetura SaaS, conforme detalhado no `ROADMAP.md` do backend.
 
 ---
 
