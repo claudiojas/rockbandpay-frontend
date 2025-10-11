@@ -56,14 +56,15 @@ O objetivo foi criar a interface que será usada para gerenciar os pedidos.
 
 ---
 
-## Fase 3: Lógica de Negócio e Experiência do Usuário
+## Fase 3: Lógica de Negócio e Experiência do Usuário (Concluída)
 
-O foco aqui é refinar as regras de negócio e a experiência do usuário.
+O foco aqui foi refinar as regras de negócio e a experiência do usuário.
 
-### Em Andamento
+### Concluído
 
 1.  **Refinar a Experiência do Usuário:**
-    *   **Dashboard Gerencial:** Implementação de uma tela com métricas e gráficos de vendas. (Concluído)
+    *   **Dashboard Gerencial:** Implementação de uma tela com métricas e gráficos de vendas.
+    *   **Gerenciamento de Pedidos e Mesas:** Adicionada a funcionalidade de exclusão de pedidos e desativação de mesas na tela de consulta, tornando o fluxo do operador mais flexível e à prova de erros.
 
 ### Próximos Passos
 

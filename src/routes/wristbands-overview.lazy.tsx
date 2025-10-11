@@ -97,8 +97,8 @@ function WristbandsOverview () {
     },
   });
 
-  const cancelOrderMutation = useMutation({
-    mutationFn: (orderId: string) => api.patch(`/orders/${orderId}/cancel`),
+  const deleteOrderMutation = useMutation({
+    mutationFn: (orderId: string) => api.delete(`/orders/${orderId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wristbands-with-details'] });
       queryClient.invalidateQueries({ queryKey: ['wristband-details'] });
@@ -111,9 +111,9 @@ function WristbandsOverview () {
     }
   };
 
-  const handleCancelOrder = (orderId: string) => {
-    if (window.confirm('Tem certeza que deseja cancelar este pedido?')) {
-      cancelOrderMutation.mutate(orderId);
+  const handleDeleteOrder = (orderId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este pedido? A ação não pode ser desfeita.')) {
+      deleteOrderMutation.mutate(orderId);
     }
   };
 
@@ -190,8 +190,8 @@ function WristbandsOverview () {
                                       <span className="font-medium">R$ {parseFloat(item.unitPrice || '0').toFixed(2)}</span>
                                     </li>
                                   ))}
-                                  <Button size="sm" variant="destructive" onClick={() => handleCancelOrder(order.id)} className="mt-2">
-                                    Cancelar Pedido
+                                  <Button size="sm" variant="destructive" onClick={() => handleDeleteOrder(order.id)} className="mt-2">
+                                    Excluir Pedido
                                   </Button>
                                 </div>
                               ))

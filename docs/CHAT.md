@@ -2,9 +2,15 @@
 
 Este arquivo resume as decisões, a arquitetura e o progresso do desenvolvimento do projeto RockBandPay, cobrindo tanto o backend quanto o frontend.
 
-## Objetivo Atual
+## Fase 3: Funcionalidades Gerenciais e Refinamento da UX (Concluído)
 
-**Fase 3 (Funcionalidades Gerenciais) concluída.** O dashboard gerencial (`/dashboard`) foi implementado e está funcional após a correção de um erro na API do backend e de erros de TypeScript no frontend.
+O dashboard gerencial (`/dashboard`) foi implementado e a experiência de usuário do operador foi refinada com funcionalidades essenciais de gerenciamento.
+
+- **Dashboard:** A tela com métricas e gráficos de vendas está funcional.
+- **Gerenciamento de Mesas (`/wristbands-overview`):**
+  - Adicionada a capacidade de alternar entre a visualização de mesas com pendências e todas as mesas ativas.
+  - Implementada a exclusão de pedidos (hard delete) para corrigir erros de lançamento.
+  - Implementada a desativação de mesas (soft delete) para removê-las de uso sem perder o histórico.
 
 **Próximo Passo:** Seguir para a próxima fase do roadmap ou aguardar novas instruções.
 

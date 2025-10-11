@@ -48,7 +48,15 @@ O fluxo de trabalho do operador de caixa está coberto de ponta a ponta pelas se
   - **Produtos Vendidos:** Lista de todos os itens vendidos na sessão.
   - Permite encerrar o expediente do caixa.
 
-### g. (Concluído) Dashboard Gerencial (Rota: `/dashboard`)
+### g. Consulta Avançada de Mesas (Rota: `/wristbands-overview`)
+- **Arquivo:** `src/routes/wristbands-overview.lazy.tsx`
+- **Funcionalidade:** Uma tela de gerenciamento que permite:
+  - Alternar a visualização entre apenas mesas com pendências e todas as mesas ativas.
+  - Na visualização de pendências, selecionar uma mesa para ver os detalhes do consumo.
+  - Excluir um pedido lançado incorretamente (hard delete).
+  - Na visualização de todas as mesas, desativar uma mesa (soft delete), removendo-a das listagens futuras mas preservando seu histórico.
+
+### h. (Concluído) Dashboard Gerencial (Rota: `/dashboard`)
 - **Arquivo:** `src/routes/dashboard.lazy.tsx`
 - **Funcionalidade:** Uma nova tela, acessível a partir da página de login, destinada a gerentes.
   - Exibe relatórios visuais e textuais sobre o desempenho das vendas.
