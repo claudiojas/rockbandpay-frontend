@@ -101,6 +101,7 @@ function WristbandsOverview () {
     mutationFn: (orderId: string) => api.patch(`/orders/${orderId}/cancel`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wristbands-with-details'] });
+      queryClient.invalidateQueries({ queryKey: ['wristband-details'] });
     },
   });
 
