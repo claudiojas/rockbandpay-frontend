@@ -97,9 +97,22 @@ function WristbandsOverview () {
     },
   });
 
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderId: string) => api.patch(`/orders/${orderId}/cancel`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wristbands-with-details'] });
+    },
+  });
+
   const handleDelete = (wristbandId: string) => {
     if (window.confirm('Tem certeza que deseja excluir esta mesa?')) {
       deleteWristbandMutation.mutate(wristbandId);
+    }
+  };
+
+  const handleCancelOrder = (orderId: string) => {
+    if (window.confirm('Tem certeza que deseja cancelar este pedido?')) {
+      cancelOrderMutation.mutate(orderId);
     }
   };
 
@@ -154,8 +167,7 @@ function WristbandsOverview () {
               <>
                 {selectedWristbandOrders && (
                   (() => {
-                    const pendingOrders = selectedWristbandOrders.filter(order => order.status !== OrderStatus.PAID);
-                    const allItems = pendingOrders.flatMap(order => order.orderItems || []).filter(Boolean);
+                    const pendingOrders = selectedWristbandOrders.filter(order => order.status !== OrderStatus.PAID && order.status !== OrderStatus.CANCELLED);
                     const grandTotal = pendingOrders.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0);
 
                     return (
@@ -166,17 +178,22 @@ function WristbandsOverview () {
                         <CardContent>
                           <h3 className="text-lg font-semibold mb-4 text-gray-200">Itens Consumidos:</h3>
                           <div className="max-h-96 overflow-y-auto pr-2 space-y-3">
-                            {allItems.length === 0 ? (
+                            {pendingOrders.length === 0 ? (
                               <div className="text-center py-10"><p className="text-gray-400">Nenhum item pendente de pagamento.</p></div>
                             ) : (
-                              <ul className="space-y-3">
-                                {allItems.map((item) => (
-                                  <li key={item.id} className="flex justify-between items-center text-gray-300">
-                                    <span>{item.quantity}x {item.product.name}</span>
-                                    <span className="font-medium">R$ {parseFloat(item.unitPrice || '0').toFixed(2)}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                              pendingOrders.map(order => (
+                                <div key={order.id} className="p-2 border-b border-gray-700">
+                                  {order.orderItems.map(item => (
+                                    <li key={item.id} className="flex justify-between items-center text-gray-300">
+                                      <span>{item.quantity}x {item.product.name}</span>
+                                      <span className="font-medium">R$ {parseFloat(item.unitPrice || '0').toFixed(2)}</span>
+                                    </li>
+                                  ))}
+                                  <Button size="sm" variant="destructive" onClick={() => handleCancelOrder(order.id)} className="mt-2">
+                                    Cancelar Pedido
+                                  </Button>
+                                </div>
+                              ))
                             )}
                           </div>
                         </CardContent>
