@@ -6,7 +6,11 @@ Este documento serve como um ponto de sincronia para desenvolvedores (humanos ou
 
 O frontend está **funcionalmente completo para o MVP (Produto Mínimo Viável)** de instância única. O fluxo de trabalho do operador de caixa, incluindo funcionalidades gerenciais como o dashboard e o gerenciamento de mesas/pedidos, está implementado e operacional.
 
-**Visão Futura:** O próximo grande passo para o projeto é a transição para uma **arquitetura SaaS (Software as a Service)**. No frontend, isso impactará principalmente o fluxo de autenticação, exigindo a criação de telas de cadastro de empresas (tenants) e um sistema de login que se comunique com a nova API multi-tenant do backend.
+**Visão Futura:** O **próximo passo estratégico** é a implementação do **"Garçom Automatizado"**. Isso envolve a criação de duas novas experiências de usuário:
+1.  Uma **WebApp para o Cliente Final**, permitindo autoatendimento completo (ver cardápio, pedir, pagar) via QR Code.
+2.  Um **Painel para a Cozinha** em tempo real para receber e gerenciar os pedidos.
+
+Após essa expansão, o plano secundário é adaptar todas as interfaces de frontend para a **arquitetura SaaS (Software as a Service)** que será desenvolvida no backend.
 
 ## 2. Funcionalidades Desenvolvidas
 

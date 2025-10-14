@@ -24,17 +24,31 @@ O objetivo desta fase foi criar uma interface de usuário completamente funciona
 
 ---
 
-## Fase 2: Adaptação para Plataforma SaaS (Próximo Passo)
+## Fase 2: Implementação do "Garçom Automatizado" (Próximo Passo)
 
-**Visão:** Alinhar o frontend com a nova arquitetura multi-tenant do backend.
+**Visão:** Expandir a experiência do usuário criando interfaces para o cliente final e para a cozinha, permitindo um fluxo de autoatendimento completo.
 
 ### Itens a Desenvolver:
 
-1.  **Novo Fluxo de Cadastro e Login:**
-    *   Criar uma tela de **cadastro de empresa (tenant)**, que será o primeiro passo para um novo cliente usar o serviço.
-    *   Ajustar a tela de login para autenticar no sistema mestre do backend, que gerencia todos os tenants.
-    *   Implementar a lógica para lidar com subdomínios ou rotas específicas de cada tenant (ex: `cliente-a.rockbandpay.com` ou `rockbandpay.com/cliente-a`).
+1.  **Criar a WebApp do Cliente (Novo Projeto Frontend):**
+    *   **Objetivo:** Permitir que o cliente visualize o cardápio, faça pedidos e pague sua conta diretamente da mesa.
+    *   **Tecnologias:** React, Vite, TanStack Query, Axios.
+    *   **Funcionalidades:**
+        *   Leitura de QR Code para iniciar a sessão da mesa.
+        *   Navegação no cardápio (consumindo `GET /products`).
+        *   Envio de pedidos (consumindo `POST /orders`).
+        *   Visualização da comanda em tempo real (via WebSockets ou polling para `GET /orders/my-session`).
+        *   Integração com gateway de pagamento para fechar a conta.
 
-2.  **Ajustes Gerais na Aplicação:**
-    *   Garantir que o token de autenticação (JWT, por exemplo) obtido após o login seja enviado em todas as requisições subsequentes à API.
-    *   O restante da aplicação deve continuar funcionando como está, pois a API se encarregará de direcionar as requisições para o banco de dados correto do tenant. O frontend não precisará saber qual banco de dados está sendo usado.
+2.  **Criar o Painel da Cozinha (Nova Tela no Frontend Atual):**
+    *   **Objetivo:** Exibir novos pedidos em tempo real para a equipe da cozinha.
+    *   **Tecnologia:** React, **WebSockets**.
+    *   **Funcionalidade:** Uma nova rota (ex: `/kitchen-display`) que se conecta ao backend via WebSocket e renderiza os pedidos à medida que chegam, permitindo a atualização de seu status (ex: "Preparando", "Pronto").
+
+---
+
+## Fase 3: Adaptação para Plataforma SaaS
+
+**Visão:** Alinhar o frontend (tanto a aplicação do operador quanto a nova WebApp do cliente) com a arquitetura multi-tenant do backend.
+
+*Esta fase mantém os mesmos itens de desenvolvimento descritos anteriormente (novo fluxo de cadastro/login, tratamento de subdomínios/rotas de tenant), mas será executada após a conclusão da Fase 2.*

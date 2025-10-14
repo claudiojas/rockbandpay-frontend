@@ -6,9 +6,9 @@ Este arquivo resume as decisões, a arquitetura e o progresso do desenvolvimento
 
 **MVP Concluído:** O sistema atingiu um estado de **Produto Mínimo Viável (MVP)** robusto, com o fluxo completo para um operador de caixa, incluindo funcionalidades gerenciais como dashboard, exclusão de pedidos e desativação de mesas.
 
-**Novo Objetivo Estratégico:** Transformar o RockBandPay em uma plataforma **SaaS (Software as a Service)** com arquitetura multi-tenant (um banco de dados por cliente).
+**Novo Objetivo Estratégico:** Implementar as funcionalidades de **"Garçom Automatizado"** para permitir o autoatendimento completo do cliente final.
 
-**Próximo Passo:** Iniciar a Fase 3 de desenvolvimento, focada na refatoração do backend para suportar a nova arquitetura SaaS, conforme detalhado no `ROADMAP.md` do backend.
+**Próximo Passo:** Com o desenvolvimento do backend para o "Garçom Automatizado" finalizado e testado, o próximo passo é iniciar a implementação das interfaces de frontend: o **Painel da Cozinha** e o **Aplicativo do Cliente**.
 
 ---
 
