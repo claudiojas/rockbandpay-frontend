@@ -12,9 +12,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
 
-const WristbandsOverviewLazyRouteImport = createFileRoute(
-  '/wristbands-overview',
-)()
+const OverviewLazyRouteImport = createFileRoute('/overview')()
 const ManageTablesLazyRouteImport = createFileRoute('/manage-tables')()
 const LoginLazyRouteImport = createFileRoute('/login')()
 const DashboardLazyRouteImport = createFileRoute('/dashboard')()
@@ -25,13 +23,11 @@ const CashRegisterCloseLazyRouteImport = createFileRoute(
   '/cash-register/close',
 )()
 
-const WristbandsOverviewLazyRoute = WristbandsOverviewLazyRouteImport.update({
-  id: '/wristbands-overview',
-  path: '/wristbands-overview',
+const OverviewLazyRoute = OverviewLazyRouteImport.update({
+  id: '/overview',
+  path: '/overview',
   getParentRoute: () => rootRouteImport,
-} as any).lazy(() =>
-  import('./routes/wristbands-overview.lazy').then((d) => d.Route),
-)
+} as any).lazy(() => import('./routes/overview.lazy').then((d) => d.Route))
 const ManageTablesLazyRoute = ManageTablesLazyRouteImport.update({
   id: '/manage-tables',
   path: '/manage-tables',
@@ -77,7 +73,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
-  '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/overview': typeof OverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
@@ -87,7 +83,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
-  '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/overview': typeof OverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
@@ -98,7 +94,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
-  '/wristbands-overview': typeof WristbandsOverviewLazyRoute
+  '/overview': typeof OverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
@@ -110,7 +106,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/manage-tables'
-    | '/wristbands-overview'
+    | '/overview'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
@@ -120,7 +116,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/manage-tables'
-    | '/wristbands-overview'
+    | '/overview'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
@@ -130,7 +126,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/manage-tables'
-    | '/wristbands-overview'
+    | '/overview'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
@@ -141,7 +137,7 @@ export interface RootRouteChildren {
   DashboardLazyRoute: typeof DashboardLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
   ManageTablesLazyRoute: typeof ManageTablesLazyRoute
-  WristbandsOverviewLazyRoute: typeof WristbandsOverviewLazyRoute
+  OverviewLazyRoute: typeof OverviewLazyRoute
   CashRegisterCloseLazyRoute: typeof CashRegisterCloseLazyRoute
   CloseBillCodeLazyRoute: typeof CloseBillCodeLazyRoute
   ProductsAddLazyRoute: typeof ProductsAddLazyRoute
@@ -149,11 +145,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/wristbands-overview': {
-      id: '/wristbands-overview'
-      path: '/wristbands-overview'
-      fullPath: '/wristbands-overview'
-      preLoaderRoute: typeof WristbandsOverviewLazyRouteImport
+    '/overview': {
+      id: '/overview'
+      path: '/overview'
+      fullPath: '/overview'
+      preLoaderRoute: typeof OverviewLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manage-tables': {
@@ -213,7 +209,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardLazyRoute: DashboardLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
   ManageTablesLazyRoute: ManageTablesLazyRoute,
-  WristbandsOverviewLazyRoute: WristbandsOverviewLazyRoute,
+  OverviewLazyRoute: OverviewLazyRoute,
   CashRegisterCloseLazyRoute: CashRegisterCloseLazyRoute,
   CloseBillCodeLazyRoute: CloseBillCodeLazyRoute,
   ProductsAddLazyRoute: ProductsAddLazyRoute,

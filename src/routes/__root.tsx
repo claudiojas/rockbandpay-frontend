@@ -39,7 +39,7 @@ function RootComponent() {
               <Link to="/dashboard" className="[&.active]:font-bold hover:underline">
                 Dashboard
               </Link>
-              <Link to="/wristbands-overview" className="[&.active]:font-bold hover:underline">
+              <Link to="/overview" className="[&.active]:font-bold hover:underline">
                 Consulta de Mesas
               </Link>
           </div>
