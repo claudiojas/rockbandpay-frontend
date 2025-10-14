@@ -6,40 +6,7 @@ import { api } from '../lib/axios'
 import { useState } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-
-// Interfaces based on the API response from /wristbands/{code}
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-}
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  unitPrice: string;
-  product: Product;
-}
-
-const OrderStatus = {
-  PENDING: 'PENDING',
-  CONFIRMED: 'CONFIRMED',
-  PREPARING: 'PREPARING',
-  READY: 'READY',
-  DELIVERED: 'DELIVERED',
-  CANCELLED: 'CANCELLED',
-  PAID: 'PAID',
-} as const;
-
-type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
-
-interface Order {
-  id: string;
-  totalAmount: string;
-  orderItems: OrderItem[];
-  wristbandId: string;
-  status: OrderStatus;
-}
+import type { ISessionDetails, OrderItem } from '@/types'
 
 const paymentOptions = [
   { value: 'CASH', label: 'Dinheiro' },
@@ -55,43 +22,38 @@ export const Route = createLazyFileRoute('/close-bill/$code')({
 })
 
 function CloseBill() {
-  const { code } = useParams({ from: '/close-bill/$code' });
+  const { code: sessionId } = useParams({ from: '/close-bill/$code' });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodValue | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const { data: orders, isLoading, error } = useQuery<Order[]>({    queryKey: ['wristband-details', code],
+  const { data: sessionDetails, isLoading, error } = useQuery<ISessionDetails>({    
+    queryKey: ['session-details', sessionId],
     queryFn: async () => {
-      const response = await api.get<{ orders: Order[] }>(`/wristbands/${code}`);
-      return response.data.orders;
+      const response = await api.get<ISessionDetails>(`/orders/session/${sessionId}`);
+      return response.data;
     },
   });
 
-  const wristbandId = orders && orders.length > 0 ? orders[0].wristbandId : null;
-
   const closeBillMutation = useMutation({
-    mutationFn: async (paymentData: { wristbandId: string; paymentMethod: PaymentMethodValue }) => {
+    mutationFn: async (paymentData: { sessionId: string; paymentMethod: PaymentMethodValue }) => {
       const response = await api.post('/payments/close-bill', paymentData);
       return response.data;
     },
     onSuccess: (data) => {
       const amount = parseFloat(data.payment.amount).toFixed(2);
       setFeedbackMessage({ type: 'success', text: `✅ Conta paga com sucesso! Valor: R$ ${amount}` });
-      queryClient.invalidateQueries({ queryKey: ['wristbands'] });
-      queryClient.removeQueries({ queryKey: ['wristband-details', code] });
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
+      queryClient.removeQueries({ queryKey: ['session-details', sessionId] });
       setTimeout(() => navigate({ to: '/' }), 3000);
     },
     onError: (err: any) => {
       let message = 'Ocorreu um erro no sistema. Tente novamente.';
       if (err.response) {
-        // eslint-disable-next-line no-console
-        console.error('API Error:', err.response);
         message = `Erro da API: ${err.response.status} - ${err.response.data?.message || err.message}`;
       } else {
-        // eslint-disable-next-line no-console
-        console.error('Network Error:', err);
         message = `Erro de rede: ${err.message}`;
       }
       setFeedbackMessage({ type: 'error', text: message });
@@ -99,20 +61,18 @@ function CloseBill() {
   });
 
   const handleConfirmPayment = () => {
-    if (paymentMethod && wristbandId) {
-      closeBillMutation.mutate({ wristbandId, paymentMethod });
+    if (paymentMethod && sessionId) {
+      closeBillMutation.mutate({ sessionId, paymentMethod });
     } else {
-      setFeedbackMessage({ type: 'error', text: 'Erro: Não foi possível obter o ID da pulseira para o pagamento.' });
+      setFeedbackMessage({ type: 'error', text: 'Erro: Método de pagamento ou ID da sessão inválido.' });
     }
   };
 
   if (isLoading) return <div className="p-6 text-white">Carregando detalhes da conta...</div>;
   if (error) return <div className="p-6 text-red-500">Erro ao carregar detalhes: {error.message}</div>;
 
-  const pendingOrders = orders?.filter(order => order.status !== 'PAID');
-
-  const allItems = pendingOrders?.flatMap(order => order.orderItems || []).filter(Boolean) ?? [];
-  const grandTotal = pendingOrders?.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0) ?? 0;
+  const allItems: OrderItem[] = sessionDetails?.orders.flatMap(order => order.orderItems || []).filter(Boolean) ?? [];
+  const grandTotal = sessionDetails?.orders.reduce((acc, order) => acc + parseFloat(order.totalAmount || '0'), 0) ?? 0;
 
   if (feedbackMessage) {
     return (
@@ -130,7 +90,7 @@ function CloseBill() {
       <Card className="w-full max-w-2xl bg-gray-800 border-gray-700 text-white">
         <CardHeader>
           <CardTitle className="text-3xl font-extrabold">Fechamento de Conta</CardTitle>
-          <p className="text-gray-400">Pulseira: <span className="font-mono text-lg">{code}</span></p>
+          <p className="text-gray-400">Mesa: <span className="font-mono text-lg">{sessionDetails?.table.tableNumber}</span></p>
         </CardHeader>
         <CardContent>
           <h3 className="text-xl font-semibold mb-4">Resumo da Conta</h3>
@@ -140,7 +100,7 @@ function CloseBill() {
                 {allItems.map((item) => (
                   <li key={item.id} className="flex justify-between items-center text-gray-300">
                     <span>{item.quantity}x {item.product.name}</span>
-                    <span className="font-medium">R$ {parseFloat(item.unitPrice || '0').toFixed(2)}</span>
+                    <span className="font-medium">R$ {parseFloat(item.totalPrice || '0').toFixed(2)}</span>
                   </li>
                 ))}
               </ul>

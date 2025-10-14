@@ -1,12 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useWristbands } from '@/hooks/useWristbands';
+import { useTableContext } from '@/contexts/TableContext';
 import type { Product } from '@/types';
 
 interface OrderSummaryProps {
-    wristbandCode: string;
-    setWristbandCode: (code: string) => void;
     handleCheckConsumption: () => void;
     isLoadingConsumption: boolean;
     currentOrder: Product[];
@@ -17,8 +15,6 @@ interface OrderSummaryProps {
 }
 
 export function OrderSummary({
-    wristbandCode,
-    setWristbandCode,
     handleCheckConsumption,
     isLoadingConsumption,
     currentOrder,
@@ -28,14 +24,10 @@ export function OrderSummary({
     isSubmitting
 }: OrderSummaryProps) {
 
-    const { wristbands, isLoading: isLoadingWristbands } = useWristbands();
+    const { tables, isLoadingTables, tableId, setTableId } = useTableContext();
 
     const handleValueChange = (value: string) => {
-        if (value === 'none') {
-            setWristbandCode('');
-        } else {
-            setWristbandCode(value);
-        }
+        setTableId(value === 'none' ? '' : value);
     }
 
     return (
@@ -46,32 +38,32 @@ export function OrderSummary({
           </CardHeader>
           <CardContent>
             <div className="mb-4 space-y-2">
-              <label htmlFor="wristband-code" className="font-medium text-gray-300">Código da Mesa</label>
+              <label htmlFor="table-select" className="font-medium text-gray-300">Mesa</label>
               <div className="flex gap-2">
                 <Select
-                  value={wristbandCode}
+                  value={tableId}
                   onValueChange={handleValueChange}
-                  disabled={isSubmitting || isLoadingWristbands}
+                  disabled={isSubmitting || isLoadingTables}
                 >
-                  <SelectTrigger id="wristband-code" className="w-full bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500">
-                    <SelectValue placeholder="Selecione uma mesa/pulseira..." />
+                  <SelectTrigger id="table-select" className="w-full bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500">
+                    <SelectValue placeholder="Selecione uma mesa..." />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-700 text-white border-gray-600">
-                    {isLoadingWristbands ? (
+                    {isLoadingTables ? (
                       <SelectItem value="loading" disabled>Carregando...</SelectItem>
                     ) : (
                       <>
-                        <SelectItem value="none" className="hover:bg-gray-600">Nenhum</SelectItem>
-                        {wristbands?.map(wristband => (
-                          <SelectItem key={wristband.id} value={wristband.code} className="hover:bg-gray-600">
-                            {wristband.code}
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        {tables?.map(table => (
+                          <SelectItem key={table.id} value={table.id}>
+                            Mesa {table.tableNumber}
                           </SelectItem>
                         ))}
                       </>
                     )}
                   </SelectContent>
                 </Select>
-                <Button onClick={handleCheckConsumption} disabled={!wristbandCode || isLoadingConsumption} className="bg-purple-600 hover:bg-purple-700">
+                <Button onClick={handleCheckConsumption} disabled={!tableId || isLoadingConsumption} className="bg-purple-600 hover:bg-purple-700">
                   {isLoadingConsumption ? '...' : 'Ver'}
                 </Button>
               </div>
@@ -105,7 +97,7 @@ export function OrderSummary({
             )}
             <Button
               onClick={handleFinalizeOrder}
-              disabled={!wristbandCode || currentOrder.length === 0 || isSubmitting}
+              disabled={!tableId || currentOrder.length === 0 || isSubmitting}
               className="w-full p-6 text-lg font-bold bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-600"
             >
               {isSubmitting ? 'Adicionando...' : 'Adicionar à mesa'}

@@ -1,6 +1,7 @@
 import { createRootRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useCashRegisterStatus } from '../hooks/useCashRegisterStatus';
 import { useEffect } from 'react';
+import { TableProvider } from '@/contexts/TableContext';
 
 function RootComponent() {
   const navigate = useNavigate();
@@ -8,15 +9,11 @@ function RootComponent() {
   const { isActive, isLoading } = useCashRegisterStatus();
 
   useEffect(() => {
-    // Se não estiver carregando, não houver caixa ativo e não estivermos na página de login,
-    // redireciona para o login.
     if (!isLoading && !isActive && location.pathname !== '/login' && location.pathname !== '/dashboard') {
       navigate({ to: '/login', replace: true });
     }
   }, [isLoading, isActive, location.pathname, navigate]);
 
-  // Mostra uma tela de carregamento enquanto verifica o status do caixa
-  // para evitar piscar a tela antes do redirecionamento.
   if (isLoading && location.pathname !== '/login') {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
@@ -25,9 +22,8 @@ function RootComponent() {
     );
   }
 
-  // Se o usuário estiver indo para o login ou se o caixa estiver ativo, renderiza a navegação e o conteúdo
   return (
-    <>
+    <TableProvider>
       {location.pathname !== '/login' && (
          <div className='py-5 px-8 flex items-center justify-start text-white w-full bg-gray-900'>
             <div className="w-[40%] flex items-center justify-between">
@@ -38,7 +34,7 @@ function RootComponent() {
                 Adicionar Produto
               </Link>
               <Link to="/wristbands" className="[&.active]:font-bold hover:underline">
-                Adicionar uma mesa
+                Gerenciar Mesas
               </Link>
               <Link to="/dashboard" className="[&.active]:font-bold hover:underline">
                 Dashboard
@@ -51,7 +47,7 @@ function RootComponent() {
       )}
       <hr className="border-gray-700" />
       <Outlet />
-    </>
+    </TableProvider>
   );
 }
 

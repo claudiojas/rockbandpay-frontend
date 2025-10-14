@@ -5,28 +5,41 @@ export interface Product {
   description: string | null;
   categoryId: string;
   isSoldOut: boolean;
+  stock: number | null;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface ITable {
+  id: string;
+  tableNumber: number;
+  isActive: boolean;
+}
+
+export interface Session {
+  id: string;
+  tableId: string;
+  status: 'ACTIVE' | 'CLOSED';
 }
 
 export interface OrderItem {
   id: string;
   quantity: number;
-  unitPrice: string;
   totalPrice: string;
   product: Product;
 }
 
-export type OrderStatus = 'PENDING' | 'COMPLETED' | 'CANCELED' | 'PAID';
-
 export interface IOrder {
   id: string;
-  status: OrderStatus;
   totalAmount: string;
   createdAt: string;
   orderItems: OrderItem[];
 }
 
-export interface IWristbandWithDetails {
-  id: string;
-  code: string;
+export interface ISessionDetails extends Session {
+  table: ITable;
   orders: IOrder[];
 }

@@ -3,8 +3,10 @@ import { Link, createLazyFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
+import { useTableContext } from '@/contexts/TableContext';
 import { api } from '../lib/axios';
-import type { Product, IWristbandWithDetails, IOrder } from '../types';
+import type { Product, ISessionDetails, Session } from '../types';
+import { AxiosError } from 'axios';
 
 import { Button } from '@/components/ui/button';
 import { MenuList } from '@/components/page/MenuList';
@@ -19,8 +21,8 @@ export const Route = createLazyFileRoute('/')({
 function Index() {
   const { data: products, isLoading: isLoadingProducts, isError: isErrorProducts, error: errorProducts } = useProducts();
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
+  const { tableId, setTableId, selectedTable } = useTableContext();
 
-  const [wristbandCode, setWristbandCode] = useState('');
   const [currentOrder, setCurrentOrder] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,7 +31,7 @@ function Index() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
 
-  const [wristbandDetails, setWristbandDetails] = useState<IWristbandWithDetails | null>(null);
+  const [sessionDetails, setSessionDetails] = useState<ISessionDetails | null>(null);
   const [isLoadingConsumption, setIsLoadingConsumption] = useState(false);
   const [showOrderHistoryModal, setShowOrderHistoryModal] = useState(false);
 
@@ -66,46 +68,36 @@ function Index() {
   }, [products, categories, searchTerm, selectedCategoryId]);
 
   const handleFinalizeOrder = async () => {
-    if (!wristbandCode || currentOrder.length === 0) return;
+    if (!tableId || currentOrder.length === 0) return;
 
     setIsSubmitting(true);
     setSubmitMessage('Finalizando pedido...');
 
     try {
-      const wristbandResponse = await api.get<{id: string}>(`/wristbands/${wristbandCode}`);
-      const wristband = wristbandResponse.data;
-      if (!wristband) throw new Error('Pulseira não encontrada.');
-
-      const orderResponse = await api.post<IOrder>('/orders', { wristbandId: wristband.id, orderValue: total });
-      const newOrder = orderResponse.data;
+      const sessionResponse = await api.get<Session>(`/sessions/table/${tableId}/active`);
+      const session = sessionResponse.data;
+      if (!session) {
+        throw new Error('Nenhuma sessão ativa encontrada para esta mesa. Inicie uma nova sessão.');
+      }
 
       const groupedItems = currentOrder.reduce((acc, product) => {
-        if (!acc[product.id]) {
-          acc[product.id] = {
-            productId: product.id,
-            quantity: 0,
-            unitPrice: parseFloat(product.price),
-          };
+        const existingItem = acc.find(item => item.productId === product.id);
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ productId: product.id, quantity: 1 });
         }
-        acc[product.id].quantity += 1;
         return acc;
-      }, {} as Record<string, { productId: string; quantity: number; unitPrice: number; }>);
+      }, [] as { productId: string; quantity: number }[]);
 
-      const addItemPromises = Object.values(groupedItems).map(item => {
-        const payload = {
-          productId: item.productId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalPrice: item.unitPrice * item.quantity,
-        };
-        return api.post(`/orders/${newOrder.id}/items`, payload);
+      await api.post('/orders', { 
+        sessionId: session.id,
+        items: groupedItems
       });
-
-      await Promise.all(addItemPromises);
 
       setSubmitMessage('Pedido finalizado com sucesso!');
       setCurrentOrder([]);
-      setWristbandCode('');
+      setTableId('');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Falha ao finalizar o pedido.';
       setSubmitMessage(`Erro: ${errorMessage}`);
@@ -115,18 +107,23 @@ function Index() {
   };
 
   const handleCheckConsumption = async () => {
-    if (!wristbandCode) return;
+    if (!tableId || !selectedTable) return;
     setIsLoadingConsumption(true);
     setSubmitMessage('');
+
     try {
-      const response = await api.get<IWristbandWithDetails>(`/wristbands/${wristbandCode}`);
-      setWristbandDetails(response.data);
+      const sessionResponse = await api.get<Session>(`/sessions/table/${tableId}/active`);
+      const session = sessionResponse.data;
+
+      const consumptionResponse = await api.get<Omit<ISessionDetails, 'table'>>(`/orders/session/${session.id}`);
+      setSessionDetails({ ...consumptionResponse.data, table: selectedTable });
       setShowOrderHistoryModal(true);
-    } catch (err: any) {
-      if (err.response && err.response.status === 404) {
-        setSubmitMessage('Erro: Pulseira não encontrada.');
+    } catch (err) {
+      if (err instanceof AxiosError && err.response?.status === 404) {
+        setSessionDetails({ id: '', tableId, status: 'CLOSED', table: selectedTable, orders: [] });
+        setShowOrderHistoryModal(true);
       } else {
-        const errorMessage = err.response?.data?.message || err.message || 'Falha ao buscar histórico.';
+        const errorMessage = (err as any).response?.data?.message || (err as Error).message || 'Falha ao buscar histórico.';
         setSubmitMessage(`Erro: ${errorMessage}`);
       }
     } finally {
@@ -162,8 +159,6 @@ function Index() {
           onProductClick={setSelectedProduct}
         />
         <OrderSummary
-          wristbandCode={wristbandCode}
-          setWristbandCode={setWristbandCode}
           handleCheckConsumption={handleCheckConsumption}
           isLoadingConsumption={isLoadingConsumption}
           currentOrder={currentOrder}
@@ -182,7 +177,7 @@ function Index() {
         )}
         {showOrderHistoryModal && (
           <OrderHistoryModal
-            wristband={wristbandDetails}
+            sessionDetails={sessionDetails}
             onClose={() => setShowOrderHistoryModal(false)}
           />
         )}
