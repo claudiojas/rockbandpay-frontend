@@ -3,10 +3,8 @@ import { Link, createLazyFileRoute } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
-import { useTableContext } from '@/contexts/TableContext';
 import { api } from '../lib/axios';
-import type { Product, ISessionDetails, Session } from '../types';
-import { AxiosError } from 'axios';
+import type { Product, ISessionDetails } from '../types';
 
 import { Button } from '@/components/ui/button';
 import { MenuList } from '@/components/page/MenuList';
@@ -21,8 +19,8 @@ export const Route = createLazyFileRoute('/')({
 function Index() {
   const { data: products, isLoading: isLoadingProducts, isError: isErrorProducts, error: errorProducts } = useProducts();
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
-  const { tableId, setTableId, selectedTable } = useTableContext();
-
+  
+  const [sessionId, setSessionId] = useState('');
   const [currentOrder, setCurrentOrder] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +56,7 @@ function Index() {
       );
     }
     const grouped: Record<string, Product[]> = {};
-    categories.forEach(category => {
+    categories?.forEach(category => {
       const prods = filteredProducts.filter(p => p.categoryId === category.id);
       if (prods.length > 0) {
         grouped[category.name] = prods;
@@ -68,18 +66,12 @@ function Index() {
   }, [products, categories, searchTerm, selectedCategoryId]);
 
   const handleFinalizeOrder = async () => {
-    if (!tableId || currentOrder.length === 0) return;
+    if (!sessionId || currentOrder.length === 0) return;
 
     setIsSubmitting(true);
-    setSubmitMessage('Finalizando pedido...');
+    setSubmitMessage('Adicionando ao pedido...');
 
     try {
-      const sessionResponse = await api.get<Session>(`/sessions/table/${tableId}/active`);
-      const session = sessionResponse.data;
-      if (!session) {
-        throw new Error('Nenhuma sessão ativa encontrada para esta mesa. Inicie uma nova sessão.');
-      }
-
       const groupedItems = currentOrder.reduce((acc, product) => {
         const existingItem = acc.find(item => item.productId === product.id);
         if (existingItem) {
@@ -91,15 +83,15 @@ function Index() {
       }, [] as { productId: string; quantity: number }[]);
 
       await api.post('/orders', { 
-        sessionId: session.id,
+        sessionId: sessionId,
         items: groupedItems
       });
 
-      setSubmitMessage('Pedido finalizado com sucesso!');
+      setSubmitMessage('Itens adicionados com sucesso!');
       setCurrentOrder([]);
-      setTableId('');
+      setSessionId('');
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Falha ao finalizar o pedido.';
+      const errorMessage = err.response?.data?.error || err.message || 'Falha ao adicionar itens.';
       setSubmitMessage(`Erro: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
@@ -107,25 +99,16 @@ function Index() {
   };
 
   const handleCheckConsumption = async () => {
-    if (!tableId || !selectedTable) return;
+    if (!sessionId) return;
     setIsLoadingConsumption(true);
     setSubmitMessage('');
-
     try {
-      const sessionResponse = await api.get<Session>(`/sessions/table/${tableId}/active`);
-      const session = sessionResponse.data;
-
-      const consumptionResponse = await api.get<Omit<ISessionDetails, 'table'>>(`/orders/session/${session.id}`);
-      setSessionDetails({ ...consumptionResponse.data, table: selectedTable });
+      const consumptionResponse = await api.get<ISessionDetails>(`/orders/session/${sessionId}`);
+      setSessionDetails(consumptionResponse.data);
       setShowOrderHistoryModal(true);
-    } catch (err) {
-      if (err instanceof AxiosError && err.response?.status === 404) {
-        setSessionDetails({ id: '', tableId, status: 'CLOSED', table: selectedTable, orders: [] });
-        setShowOrderHistoryModal(true);
-      } else {
-        const errorMessage = (err as any).response?.data?.message || (err as Error).message || 'Falha ao buscar histórico.';
-        setSubmitMessage(`Erro: ${errorMessage}`);
-      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || err.message || 'Falha ao buscar histórico.';
+      setSubmitMessage(`Erro: ${errorMessage}`);
     } finally {
       setIsLoadingConsumption(false);
     }
@@ -150,7 +133,7 @@ function Index() {
       <div className="flex gap-8">
         <MenuList
           productsByCategory={productsByCategory}
-          categories={categories}
+          categories={categories ?? []}
           isLoadingCategories={isLoadingCategories}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -159,6 +142,8 @@ function Index() {
           onProductClick={setSelectedProduct}
         />
         <OrderSummary
+          sessionId={sessionId}
+          setSessionId={setSessionId}
           handleCheckConsumption={handleCheckConsumption}
           isLoadingConsumption={isLoadingConsumption}
           currentOrder={currentOrder}

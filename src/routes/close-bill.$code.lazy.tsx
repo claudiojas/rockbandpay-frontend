@@ -46,6 +46,7 @@ function CloseBill() {
       const amount = parseFloat(data.payment.amount).toFixed(2);
       setFeedbackMessage({ type: 'success', text: `✅ Conta paga com sucesso! Valor: R$ ${amount}` });
       queryClient.invalidateQueries({ queryKey: ['tables'] });
+      queryClient.invalidateQueries({ queryKey: ['active-sessions'] }); // Invalida o cache de sessões ativas
       queryClient.removeQueries({ queryKey: ['session-details', sessionId] });
       setTimeout(() => navigate({ to: '/' }), 3000);
     },

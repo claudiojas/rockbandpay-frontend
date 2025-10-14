@@ -5,6 +5,8 @@ import { api } from '../lib/axios';
 import { useQueryClient } from '@tanstack/react-query';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useTableContext } from '@/contexts/TableContext';
+import { useActiveSessions } from '@/hooks/useActiveSessions';
+import { Button } from '@/components/ui/button';
 
 export const Route = createLazyFileRoute('/manage-tables')({
   component: ManageTables,
@@ -13,6 +15,8 @@ export const Route = createLazyFileRoute('/manage-tables')({
 function ManageTables() {
   const queryClient = useQueryClient();
   const { tables, isLoadingTables: isLoading } = useTableContext();
+  const { data: activeSessions } = useActiveSessions();
+
   const [tableNumber, setTableNumber] = useState('');
   const [message, setMessage] = useState('');
   const [selectedTableIds, setSelectedTableIds] = useState<string[]>([]);
@@ -53,12 +57,24 @@ function ManageTables() {
     }
 
     try {
-      await api.post('/tables', { tableNumber: num });
+      await api.post('/tables', { number: num });
       setMessage(`Mesa "${num}" criada com sucesso!`);
       setTableNumber('');
       queryClient.invalidateQueries({ queryKey: ['tables'] });
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao criar a mesa.';
+      setMessage(errorMessage);
+    }
+  };
+
+  const handleStartSession = async (tableId: string) => {
+    setMessage('');
+    try {
+      await api.post('/sessions', { tableId });
+      setMessage(`Sessão iniciada para a mesa com sucesso!`);
+      queryClient.invalidateQueries({ queryKey: ['active-sessions'] });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Não foi possível iniciar a sessão.';
       setMessage(errorMessage);
     }
   };
@@ -117,15 +133,19 @@ function ManageTables() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tables.sort((a, b) => a.tableNumber - b.tableNumber).map(table => {
                 const isSelected = selectedTableIds.includes(table.id);
+                const isActive = activeSessions?.some(s => s.tableId === table.id);
                 return (
-                  <div key={table.id} className={`relative bg-gray-800 p-4 rounded-lg flex flex-col items-center gap-3 transition-all ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+                  <div key={table.id} className={`relative bg-gray-800 p-4 rounded-lg flex flex-col items-center gap-4 transition-all ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
                     <input 
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => handleSelectTable(table.id)}
                       className="absolute top-3 left-3 w-5 h-5"
                     />
-                    <h4 className="text-xl font-bold text-amber-400 pt-6">Mesa {table.tableNumber}</h4>
+                    <div className="flex items-center gap-3 pt-6">
+                      <h4 className="text-xl font-bold text-amber-400">Mesa {table.tableNumber}</h4>
+                      {isActive && <span className="text-xs bg-green-500 text-white font-bold py-1 px-2 rounded-full">ATIVA</span>}
+                    </div>
                     <div className="bg-white p-4 rounded-md">
                       <QRCodeCanvas
                         value={getTableUrl(table.id)}
@@ -136,7 +156,14 @@ function ManageTables() {
                         includeMargin={false}
                       />
                     </div>
-                    <p className="text-xs text-gray-400 text-center break-all">{getTableUrl(table.id)}</p>
+                    <p className="text-xs text-gray-400 text-center break-all w-full truncate">{getTableUrl(table.id)}</p>
+                    <Button 
+                      onClick={() => handleStartSession(table.id)}
+                      disabled={isActive}
+                      className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    >
+                      {isActive ? 'Sessão em Andamento' : 'Iniciar Sessão'}
+                    </Button>
                   </div>
                 );
               })}

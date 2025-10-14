@@ -1,89 +1,39 @@
 # Contexto do Desenvolvimento do Frontend - RockBandPay
 
-Este documento serve como um ponto de sincronia para desenvolvedores (humanos ou IAs) continuarem o desenvolvimento da aplicação frontend do RockBandPay. Ele descreve o estado atual, as funcionalidades implementadas e as tecnologias utilizadas.
+Este documento descreve o estado atual, a arquitetura e os fluxos de trabalho da aplicação frontend do RockBandPay.
 
-## 1. Ponto Atual do Desenvolvimento
+## 1. Arquitetura e Gerenciamento de Estado
 
-O frontend está **funcionalmente completo para o MVP (Produto Mínimo Viável)** de instância única. O fluxo de trabalho do operador de caixa, incluindo funcionalidades gerenciais como o dashboard e o gerenciamento de mesas/pedidos, está implementado e operacional.
+O frontend utiliza uma arquitetura moderna com separação de responsabilidades e um gerenciamento de estado centralizado para certos domínios.
 
-**Visão Futura:** O **próximo passo estratégico** é a implementação do **"Garçom Automatizado"**. Isso envolve a criação de duas novas experiências de usuário:
-1.  Uma **WebApp para o Cliente Final**, permitindo autoatendimento completo (ver cardápio, pedir, pagar) via QR Code.
-2.  Um **Painel para a Cozinha** em tempo real para receber e gerenciar os pedidos.
+- **Framework:** React 19 com Vite
+- **Roteamento:** TanStack Router (baseado em arquivos)
+- **Gerenciamento de Estado (Server):** TanStack Query (React Query) para caching de dados da API.
+- **Gerenciamento de Estado (Global):** React Context (`TableContext`) para gerenciar a lista de todas as mesas ativas e disponibilizá-la para múltiplos componentes.
+- **Estilização:** Tailwind CSS com componentes `shadcn/ui`.
 
-Após essa expansão, o plano secundário é adaptar todas as interfaces de frontend para a **arquitetura SaaS (Software as a Service)** que será desenvolvida no backend.
+## 2. Fluxos de Trabalho e Telas Principais
 
-## 2. Funcionalidades Desenvolvidas
+A aplicação é dividida em telas com responsabilidades claras:
 
-O fluxo de trabalho do operador de caixa está coberto de ponta a ponta pelas seguintes telas:
-
-### a. Abertura de Caixa (Rota: `/login`)
-- **Arquivo:** `src/routes/login.lazy.tsx`
-- **Funcionalidade:** Tela inicial que força o operador a abrir um novo caixa com um valor inicial antes de poder acessar o sistema. Redireciona automaticamente para o PDV se um caixa já estiver ativo.
-
-### b. Ponto de Venda (PDV) (Rota: `/`)
+### a. Ponto de Venda (PDV) (Rota: `/`)
 - **Arquivo:** `src/routes/index.lazy.tsx`
-- **Funcionalidade:** A tela principal de operações, onde o operador pode:
-  - Navegar pelo cardápio, com filtros por categoria e busca por nome.
-  - Associar um pedido a uma pulseira/mesa.
-  - Adicionar produtos ao pedido.
-  - Consultar o histórico de consumo de uma pulseira a qualquer momento.
-  - Finalizar o pedido, enviando-o para a API.
+- **Função:** Tela principal do operador de caixa.
+- **Fluxo:** O menu de seleção "Mesa Ativa" é populado usando o hook `useActiveSessions`, que busca dados do endpoint `GET /overview/sessions`. Isso garante que o operador só possa adicionar itens a sessões que já foram iniciadas (seja pelo cliente via QR Code ou manualmente pelo gerente). Isso resolve o erro 404 que ocorria ao tentar adicionar um pedido a uma mesa sem sessão.
 
-### c. Gerenciamento de Produtos (Rota: `/products/add`)
-- **Arquivo:** `src/routes/products.add.lazy.tsx`
-- **Funcionalidade:** Formulário para cadastrar novos produtos e, inclusive, adicionar novas categorias de produtos diretamente na mesma tela.
+### b. Gerenciamento de Mesas (Rota: `/manage-tables`)
+- **Arquivo:** `src/routes/manage-tables.lazy.tsx`
+- **Função:** Tela administrativa para o gerente configurar o salão.
+- **Fluxo de Criação:** Permite criar novas mesas informando seu número.
+- **Fluxo de Arquivamento (Soft Delete):** Permite selecionar múltiplas mesas e "Arquivá-las". Isso chama o endpoint `POST /tables/archive` que apenas desativa as mesas (`isActive = false`), preservando o histórico de vendas. A tela possui uma trava de segurança que impede o arquivamento de mesas que tenham sessões ativas.
+- **Fluxo de Início de Sessão Manual:** Para cada mesa livre, há um botão "Iniciar Sessão". Isso permite que o gerente inicie uma sessão para clientes que não usam o QR Code, chamando o endpoint `POST /sessions`.
 
-### d. Gerenciamento de Pulseiras (Rota: `/wristbands`)
-- **Arquivo:** `src/routes/wristbands.lazy.tsx`
-- **Funcionalidade:** Tela para o cadastro de novas pulseiras no sistema.
+### c. Painel de Controle (Rota: `/overview`)
+- **Arquivo:** `src/routes/overview.lazy.tsx`
+- **Função:** Um painel de monitoramento em tempo real para o gerente.
+- **Fluxo:** A tela busca e exibe **apenas** as sessões ativas, mostrando o total consumido em cada uma. Ao selecionar uma sessão, o gerente pode ver todos os itens e tem a opção de **excluir um item individualmente** para corrigir erros de lançamento (chama o endpoint `DELETE /orders/items/:itemId`).
 
-### e. Fechamento de Conta do Cliente (Rota: `/close-bill/$code`)
+### d. Fechamento de Conta (Rota: `/close-bill/$code`)
 - **Arquivo:** `src/routes/close-bill.$code.lazy.tsx`
-- **Funcionalidade:** Permite finalizar a conta de uma pulseira específica.
-  - Exibe o consumo detalhado.
-  - Permite a seleção de um método de pagamento (Dinheiro, PIX, etc.).
-  - Registra o pagamento na API.
-
-### f. Fechamento de Caixa (Fim de Expediente) (Rota: `/cash-register/close`)
-- **Arquivo:** `src/routes/cash-register.close.lazy.tsx`
-- **Funcionalidade:** Apresenta um relatório completo da sessão do caixa.
-  - **Resumo Financeiro:** Valor de abertura, total recebido, valor esperado.
-  - **Detalhes de Pagamento:** Total por método (Dinheiro, PIX, etc.).
-  - **Produtos Vendidos:** Lista de todos os itens vendidos na sessão.
-  - Permite encerrar o expediente do caixa.
-
-### g. Consulta Avançada de Mesas (Rota: `/wristbands-overview`)
-- **Arquivo:** `src/routes/wristbands-overview.lazy.tsx`
-- **Funcionalidade:** Uma tela de gerenciamento que permite:
-  - Alternar a visualização entre apenas mesas com pendências e todas as mesas ativas.
-  - Na visualização de pendências, selecionar uma mesa para ver os detalhes do consumo.
-  - Excluir um pedido lançado incorretamente (hard delete).
-  - Na visualização de todas as mesas, desativar uma mesa (soft delete), removendo-a das listagens futuras mas preservando seu histórico.
-
-### h. (Concluído) Dashboard Gerencial (Rota: `/dashboard`)
-- **Arquivo:** `src/routes/dashboard.lazy.tsx`
-- **Funcionalidade:** Uma nova tela, acessível a partir da página de login, destinada a gerentes.
-  - Exibe relatórios visuais e textuais sobre o desempenho das vendas.
-  - Análises semanais e mensais.
-  - Ranking de produtos mais vendidos.
-  - Gráficos de horários de pico de vendas.
-
-## 3. Estrutura do Projeto
-
-- `src/routes/`: Contém os componentes de página para cada rota da aplicação, utilizando **TanStack Router**.
-- `src/components/`: Componentes React reutilizáveis (`ui`) e específicos de páginas (`page`).
-- `src/hooks/`: Custom hooks para encapsular lógica de busca de dados (`useProducts`, `useCashRegisterStatus`, etc.).
-- `src/lib/`: Utilitários e a instância configurada do `axios`.
-- `src/routeTree.gen.ts`: Arquivo gerado pelo TanStack Router que define a árvore de rotas.
-
-## 4. Tecnologias e Bibliotecas
-
-- **Framework:** React 19
-- **Linguagem:** TypeScript
-- **Build Tool:** Vite
-- **Roteamento:** TanStack Router
-- **Estilização:** Tailwind CSS
-- **Componentes de UI:** shadcn/ui
-- **Requisições HTTP:** Axios
-- **Gerenciamento de Estado (Server):** TanStack Query
-- **Gráficos:** Recharts
+- **Função:** Finalizar e pagar a conta de uma sessão.
+- **Fluxo:** Após o pagamento ser confirmado, a lógica agora invalida o cache da query `active-sessions` (`['active-sessions']`). Isso garante que, ao voltar para a tela principal, a lista de mesas ativas esteja sempre atualizada.
