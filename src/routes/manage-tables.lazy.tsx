@@ -15,6 +15,32 @@ function ManageTables() {
   const { tables, isLoadingTables: isLoading } = useTableContext();
   const [tableNumber, setTableNumber] = useState('');
   const [message, setMessage] = useState('');
+  const [selectedTableIds, setSelectedTableIds] = useState<string[]>([]);
+
+  const handleSelectTable = (tableId: string) => {
+    setSelectedTableIds(prev => 
+      prev.includes(tableId) 
+        ? prev.filter(id => id !== tableId) 
+        : [...prev, tableId]
+    );
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedTableIds.length === 0) return;
+    if (!window.confirm(`Tem certeza que deseja arquivar ${selectedTableIds.length} mesa(s)?`)) {
+      return;
+    }
+
+    try {
+      await api.post('/tables/archive', { ids: selectedTableIds });
+      setMessage(`${selectedTableIds.length} mesa(s) arquivada(s) com sucesso!`);
+      setSelectedTableIds([]);
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || 'Ocorreu um erro ao arquivar as mesas.';
+      setMessage(errorMessage);
+    }
+  };
 
   const handleCreateTable = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,27 +100,46 @@ function ManageTables() {
         </div>
 
         <div>
-          <h3 className="text-2xl font-semibold mb-4">Mesas Cadastradas</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-semibold">Mesas Cadastradas</h3>
+            {selectedTableIds.length > 0 && (
+              <button 
+                onClick={handleBulkArchive}
+                className="p-2 px-4 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+              >
+                Arquivar Selecionadas ({selectedTableIds.length})
+              </button>
+            )}
+          </div>
           {isLoading ? (
             <p>Carregando mesas...</p>
           ) : tables && tables.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tables.sort((a, b) => a.tableNumber - b.tableNumber).map(table => (
-                <div key={table.id} className="bg-gray-800 p-4 rounded-lg flex flex-col items-center gap-3">
-                  <h4 className="text-xl font-bold text-amber-400">Mesa {table.tableNumber}</h4>
-                  <div className="bg-white p-4 rounded-md">
-                    <QRCodeCanvas
-                      value={getTableUrl(table.id)}
-                      size={180}
-                      bgColor={"#ffffff"}
-                      fgColor={"#000000"}
-                      level={"L"}
-                      includeMargin={false}
+              {tables.sort((a, b) => a.tableNumber - b.tableNumber).map(table => {
+                const isSelected = selectedTableIds.includes(table.id);
+                return (
+                  <div key={table.id} className={`relative bg-gray-800 p-4 rounded-lg flex flex-col items-center gap-3 transition-all ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+                    <input 
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleSelectTable(table.id)}
+                      className="absolute top-3 left-3 w-5 h-5"
                     />
+                    <h4 className="text-xl font-bold text-amber-400 pt-6">Mesa {table.tableNumber}</h4>
+                    <div className="bg-white p-4 rounded-md">
+                      <QRCodeCanvas
+                        value={getTableUrl(table.id)}
+                        size={180}
+                        bgColor={"#ffffff"}
+                        fgColor={"#000000"}
+                        level={"L"}
+                        includeMargin={false}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 text-center break-all">{getTableUrl(table.id)}</p>
                   </div>
-                  <p className="text-xs text-gray-400 text-center break-all">{getTableUrl(table.id)}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-gray-400">Nenhuma mesa cadastrada ainda.</p>
