@@ -15,7 +15,7 @@ import { Route as rootRouteImport } from './routes/__root'
 const WristbandsOverviewLazyRouteImport = createFileRoute(
   '/wristbands-overview',
 )()
-const WristbandsLazyRouteImport = createFileRoute('/wristbands')()
+const ManageTablesLazyRouteImport = createFileRoute('/manage-tables')()
 const LoginLazyRouteImport = createFileRoute('/login')()
 const DashboardLazyRouteImport = createFileRoute('/dashboard')()
 const IndexLazyRouteImport = createFileRoute('/')()
@@ -32,11 +32,11 @@ const WristbandsOverviewLazyRoute = WristbandsOverviewLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/wristbands-overview.lazy').then((d) => d.Route),
 )
-const WristbandsLazyRoute = WristbandsLazyRouteImport.update({
-  id: '/wristbands',
-  path: '/wristbands',
+const ManageTablesLazyRoute = ManageTablesLazyRouteImport.update({
+  id: '/manage-tables',
+  path: '/manage-tables',
   getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/wristbands.lazy').then((d) => d.Route))
+} as any).lazy(() => import('./routes/manage-tables.lazy').then((d) => d.Route))
 const LoginLazyRoute = LoginLazyRouteImport.update({
   id: '/login',
   path: '/login',
@@ -76,7 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRoute
+  '/manage-tables': typeof ManageTablesLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
@@ -86,7 +86,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRoute
+  '/manage-tables': typeof ManageTablesLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
@@ -97,7 +97,7 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
-  '/wristbands': typeof WristbandsLazyRoute
+  '/manage-tables': typeof ManageTablesLazyRoute
   '/wristbands-overview': typeof WristbandsOverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
@@ -109,7 +109,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
-    | '/wristbands'
+    | '/manage-tables'
     | '/wristbands-overview'
     | '/cash-register/close'
     | '/close-bill/$code'
@@ -119,7 +119,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
-    | '/wristbands'
+    | '/manage-tables'
     | '/wristbands-overview'
     | '/cash-register/close'
     | '/close-bill/$code'
@@ -129,7 +129,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
-    | '/wristbands'
+    | '/manage-tables'
     | '/wristbands-overview'
     | '/cash-register/close'
     | '/close-bill/$code'
@@ -140,7 +140,7 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   DashboardLazyRoute: typeof DashboardLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
-  WristbandsLazyRoute: typeof WristbandsLazyRoute
+  ManageTablesLazyRoute: typeof ManageTablesLazyRoute
   WristbandsOverviewLazyRoute: typeof WristbandsOverviewLazyRoute
   CashRegisterCloseLazyRoute: typeof CashRegisterCloseLazyRoute
   CloseBillCodeLazyRoute: typeof CloseBillCodeLazyRoute
@@ -156,11 +156,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WristbandsOverviewLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/wristbands': {
-      id: '/wristbands'
-      path: '/wristbands'
-      fullPath: '/wristbands'
-      preLoaderRoute: typeof WristbandsLazyRouteImport
+    '/manage-tables': {
+      id: '/manage-tables'
+      path: '/manage-tables'
+      fullPath: '/manage-tables'
+      preLoaderRoute: typeof ManageTablesLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -212,7 +212,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   DashboardLazyRoute: DashboardLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
-  WristbandsLazyRoute: WristbandsLazyRoute,
+  ManageTablesLazyRoute: ManageTablesLazyRoute,
   WristbandsOverviewLazyRoute: WristbandsOverviewLazyRoute,
   CashRegisterCloseLazyRoute: CashRegisterCloseLazyRoute,
   CloseBillCodeLazyRoute: CloseBillCodeLazyRoute,

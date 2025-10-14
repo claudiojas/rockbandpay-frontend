@@ -33,7 +33,7 @@ function RootComponent() {
               <Link to="/products/add" className="[&.active]:font-bold hover:underline">
                 Adicionar Produto
               </Link>
-              <Link to="/wristbands" className="[&.active]:font-bold hover:underline">
+              <Link to="/manage-tables" className="[&.active]:font-bold hover:underline">
                 Gerenciar Mesas
               </Link>
               <Link to="/dashboard" className="[&.active]:font-bold hover:underline">
