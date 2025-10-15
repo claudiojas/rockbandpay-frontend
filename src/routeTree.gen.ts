@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 
 const OverviewLazyRouteImport = createFileRoute('/overview')()
 const ManageTablesLazyRouteImport = createFileRoute('/manage-tables')()
+const ManageProductsLazyRouteImport = createFileRoute('/manage-products')()
 const LoginLazyRouteImport = createFileRoute('/login')()
 const DashboardLazyRouteImport = createFileRoute('/dashboard')()
 const IndexLazyRouteImport = createFileRoute('/')()
@@ -33,6 +34,13 @@ const ManageTablesLazyRoute = ManageTablesLazyRouteImport.update({
   path: '/manage-tables',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/manage-tables.lazy').then((d) => d.Route))
+const ManageProductsLazyRoute = ManageProductsLazyRouteImport.update({
+  id: '/manage-products',
+  path: '/manage-products',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/manage-products.lazy').then((d) => d.Route),
+)
 const LoginLazyRoute = LoginLazyRouteImport.update({
   id: '/login',
   path: '/login',
@@ -72,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
+  '/manage-products': typeof ManageProductsLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
   '/overview': typeof OverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
@@ -82,6 +91,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
+  '/manage-products': typeof ManageProductsLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
   '/overview': typeof OverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
@@ -93,6 +103,7 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
   '/login': typeof LoginLazyRoute
+  '/manage-products': typeof ManageProductsLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
   '/overview': typeof OverviewLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
+    | '/manage-products'
     | '/manage-tables'
     | '/overview'
     | '/cash-register/close'
@@ -115,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
+    | '/manage-products'
     | '/manage-tables'
     | '/overview'
     | '/cash-register/close'
@@ -125,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
+    | '/manage-products'
     | '/manage-tables'
     | '/overview'
     | '/cash-register/close'
@@ -136,6 +150,7 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   DashboardLazyRoute: typeof DashboardLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
+  ManageProductsLazyRoute: typeof ManageProductsLazyRoute
   ManageTablesLazyRoute: typeof ManageTablesLazyRoute
   OverviewLazyRoute: typeof OverviewLazyRoute
   CashRegisterCloseLazyRoute: typeof CashRegisterCloseLazyRoute
@@ -157,6 +172,13 @@ declare module '@tanstack/react-router' {
       path: '/manage-tables'
       fullPath: '/manage-tables'
       preLoaderRoute: typeof ManageTablesLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manage-products': {
+      id: '/manage-products'
+      path: '/manage-products'
+      fullPath: '/manage-products'
+      preLoaderRoute: typeof ManageProductsLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -208,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   DashboardLazyRoute: DashboardLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
+  ManageProductsLazyRoute: ManageProductsLazyRoute,
   ManageTablesLazyRoute: ManageTablesLazyRoute,
   OverviewLazyRoute: OverviewLazyRoute,
   CashRegisterCloseLazyRoute: CashRegisterCloseLazyRoute,

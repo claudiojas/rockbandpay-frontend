@@ -108,7 +108,8 @@ function Index() {
       setShowOrderHistoryModal(true);
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || 'Falha ao buscar histórico.';
-      setSubmitMessage(`Erro: ${errorMessage}`);
+      console.error(`Erro: ${errorMessage}`);
+      setShowOrderHistoryModal(true);
     } finally {
       setIsLoadingConsumption(false);
     }

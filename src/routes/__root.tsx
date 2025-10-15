@@ -25,13 +25,16 @@ function RootComponent() {
   return (
     <TableProvider>
       {location.pathname !== '/login' && (
-         <div className='py-5 px-8 flex items-center justify-start text-white w-full bg-gray-900'>
-            <div className="w-[40%] flex items-center justify-between">
+         <div className='py-5 px-8 flex items-center justify-center text-white w-full bg-gray-900'>
+            <div className="w-[80%] flex items-center justify-between">
               <Link to="/" className="[&.active]:font-bold hover:underline">
                 Caixa
               </Link>
               <Link to="/products/add" className="[&.active]:font-bold hover:underline">
                 Adicionar Produto
+              </Link>
+              <Link to="/manage-products" className="[&.active]:font-bold hover:underline">
+                Gerenciar Produtos
               </Link>
               <Link to="/manage-tables" className="[&.active]:font-bold hover:underline">
                 Gerenciar Mesas

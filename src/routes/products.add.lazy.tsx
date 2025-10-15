@@ -21,6 +21,7 @@ function AddProduct() {
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -59,6 +60,7 @@ function AddProduct() {
       await api.post('/products', {
         name,
         price: parseFloat(price),
+        stock: stock ? parseInt(stock, 10) : 0,
         categoryId,
         description,
       });
@@ -66,6 +68,7 @@ function AddProduct() {
       setSubmitMessage('Produto adicionado com sucesso!');
       setName('');
       setPrice('');
+      setStock('');
       setDescription('');
       setCategoryId('');
     } catch (err: any) {
@@ -96,18 +99,33 @@ function AddProduct() {
                 disabled={isSubmitting}
               />
             </div>
-            <div className="space-y-2">
-              <label htmlFor="price" className="font-medium text-gray-300">Preço</label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500"
-                placeholder="Ex: 15.50"
-                disabled={isSubmitting}
-              />
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="price" className="font-medium text-gray-300">Preço</label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500"
+                  placeholder="Ex: 15.50"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="stock" className="font-medium text-gray-300">Estoque Inicial</label>
+                <Input
+                  id="stock"
+                  type="number"
+                  step="1"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  className="bg-gray-700 border-gray-600 text-white focus-visible:ring-blue-500"
+                  placeholder="Ex: 50"
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <label htmlFor="description" className="font-medium text-gray-300">Descrição (Opcional)</label>
