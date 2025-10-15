@@ -1,6 +1,4 @@
 import { createLazyFileRoute } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../lib/axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   BarChart,
@@ -11,159 +9,162 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
   LineChart,
-  Line,
+  Line
 } from 'recharts';
-
-// Based on the backend schema
-interface OrderItem {
-  id: string;
-  quantity: number;
-  totalPrice: string;
-  product: {
-    id: string;
-    name: string;
-  };
-}
-
-interface Order {
-  id: string;
-  totalAmount: string;
-  createdAt: string;
-  orderItems: OrderItem[];
-  status: 'PENDING' | 'PAID' | 'CANCELLED';
-}
+import { useSalesByTable } from '../hooks/useSalesByTable';
+import { useSalesByPaymentMethod } from '../hooks/useSalesByPaymentMethod';
+import { useProductPerformance } from '../hooks/useProductPerformance';
+import { useSalesOverTime } from '../hooks/useSalesOverTime';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 export const Route = createLazyFileRoute('/dashboard')({
   component: Dashboard,
 });
 
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, payload }: any) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      {`${payload.name} (${(percent * 100).toFixed(0)}%)`}
+    </text>
+  );
+};
+
 function Dashboard() {
-  const { data: orders, isLoading, error } = useQuery<Order[]>({    queryKey: ['orders'],
-    queryFn: async () => {
-      const response = await api.get('/orders');
-      return response.data;
-    },
-  });
+  const [period, setPeriod] = useState<'week' | 'month'>('week');
+  const { data: salesByTable, isLoading: isLoadingSalesByTable } = useSalesByTable(period);
+  const { data: salesByPaymentMethod, isLoading: isLoadingSalesByPayment } = useSalesByPaymentMethod(period);
+  const { data: productPerformance, isLoading: isLoadingProductPerformance } = useProductPerformance(period);
+  const { data: salesOverTime, isLoading: isLoadingSalesOverTime } = useSalesOverTime(period);
+
+  const isLoading = isLoadingSalesByTable || isLoadingSalesByPayment || isLoadingProductPerformance || isLoadingSalesOverTime;
+
+  const totalRevenue = salesByPaymentMethod?.reduce((acc, item) => acc + item.total, 0) || 0;
+
+  const formatCurrency = (value: number) => `R$ ${Number(value).toFixed(2)}`;
 
   if (isLoading) {
     return <div className="p-6 text-white">Carregando dados do dashboard...</div>;
   }
 
-  if (error) {
-    return <div className="p-6 text-red-500">Erro ao carregar dados: {error.message}</div>;
-  }
-
-  if (!orders) {
-    return <div className="p-6 text-white">Nenhum dado de pedido encontrado.</div>;
-  }
-
-  if (!Array.isArray(orders)) {
-    return <div className="p-6 text-white">Dados de pedidos em formato inesperado.</div>;
-  }
-
-  // Process data for metrics and charts
-  const paidOrders = orders.filter(order => order.status === 'PAID');
-
-  const totalRevenue = paidOrders.reduce((acc, order) => acc + parseFloat(order.totalAmount), 0);
-  const totalOrders = paidOrders.length;
-
-  const productSales = paidOrders
-    .flatMap(order => order.orderItems || [])
-    .reduce((acc: { name: string; total: number }[], item) => {
-      const existingProduct = acc.find(p => p.name === item.product.name);
-      if (existingProduct) {
-        existingProduct.total += item.quantity;
-      } else {
-        acc.push({ name: item.product.name, total: item.quantity });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => b.total - a.total);
-
-  const salesOverTime = paidOrders
-    .reduce((acc: { date: string; revenue: number }[], order) => {
-      const date = new Date(order.createdAt).toLocaleDateString('pt-BR');
-      const existingDate = acc.find(d => d.date === date);
-      if (existingDate) {
-        existingDate.revenue += parseFloat(order.totalAmount);
-      } else {
-        acc.push({ date, revenue: parseFloat(order.totalAmount) });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => new Date(a.date.split('/').reverse().join('-')).getTime() - new Date(b.date.split('/').reverse().join('-')).getTime());
-
   return (
     <div className="p-6 bg-gray-900 text-white min-h-screen">
-      <h1 className="text-3xl font-extrabold mb-8">Dashboard Gerencial</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-extrabold">Dashboard Gerencial</h1>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setPeriod('week')} variant={period === 'week' ? 'secondary' : 'outline'}>Últimos 7 dias</Button>
+          <Button onClick={() => setPeriod('month')} variant={period === 'month' ? 'secondary' : 'outline'}>Últimos 30 dias</Button>
+        </div>
+      </div>
 
       {/* Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card className="bg-gray-800 border-gray-700 text-white">
           <CardHeader>
-            <CardTitle className="text-lg">Faturamento Total</CardTitle>
+            <CardTitle className="text-lg">Faturamento Total (Pedidos Pagos)</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold">R$ {totalRevenue.toFixed(2)}</p>
+            <p className="text-4xl font-bold">{formatCurrency(totalRevenue)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-gray-800 border-gray-700 text-white">
-          <CardHeader>
-            <CardTitle className="text-lg">Vendas Realizadas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold">{totalOrders}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gray-800 border-gray-700 text-white">
-          <CardHeader>
-            <CardTitle className="text-lg">Produto Mais Vendido</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{productSales.length > 0 ? productSales[0].name : 'N/A'}</p>
-            <p className="text-gray-400">{productSales.length > 0 ? `${productSales[0].total} unidades` : ''}</p>
-          </CardContent>
-        </Card>
+        {/* Other metric cards can be added here */}
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="bg-gray-800 border-gray-700 p-4 text-white">
           <CardHeader>
-            <CardTitle>Top 5 Produtos Mais Vendidos</CardTitle>
+            <CardTitle>Faturamento por Mesa</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={productSales.slice(0, 5)}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis dataKey="name" stroke="#888" />
-                <YAxis stroke="#888" />
-                <Tooltip contentStyle={{ backgroundColor: '#333', border: 'none' }} />
-                <Legend />
-                <Bar dataKey="total" fill="#8884d8" name="Unidades Vendidas" />
-              </BarChart>
-            </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={salesByTable}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                  <XAxis dataKey="tableNumber" name="Mesa" stroke="#888" />
+                  <YAxis stroke="#888" tickFormatter={formatCurrency} />
+                  <Tooltip contentStyle={{ backgroundColor: '#333', border: 'none' }} formatter={(value: number) => formatCurrency(value)} />
+                  <Legend />
+                  <Bar dataKey="total" fill="#8884d8" name="Faturamento" />
+                </BarChart>
+              </ResponsiveContainer>
           </CardContent>
         </Card>
 
         <Card className="bg-gray-800 border-gray-700 p-4 text-white">
           <CardHeader>
-            <CardTitle>Faturamento Diário</CardTitle>
+            <CardTitle>Formas de Pagamento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie 
+                  data={salesByPaymentMethod} 
+                  dataKey="total" 
+                  nameKey="name" 
+                  cx="50%" 
+                  cy="50%" 
+                  outerRadius={120} 
+                  fill="#8884d8" 
+                  labelLine={false}
+                  label={renderCustomizedLabel}
+                >
+                  {salesByPaymentMethod?.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gray-800 border-gray-700 p-4 text-white col-span-1 lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Vendas ao Longo do Tempo</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={salesOverTime}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                 <XAxis dataKey="date" stroke="#888" />
-                <YAxis stroke="#888" />
-                <Tooltip contentStyle={{ backgroundColor: '#333', border: 'none' }} />
+                <YAxis stroke="#888" tickFormatter={formatCurrency} />
+                <Tooltip contentStyle={{ backgroundColor: '#333', border: 'none' }} formatter={(value: number) => formatCurrency(value)} />
                 <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#82ca9d" name="Faturamento" />
+                <Line type="monotone" dataKey="total" stroke="#82ca9d" name="Faturamento" />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        <Card className="bg-gray-800 border-gray-700 p-4 text-white col-span-1 lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Top 5 Produtos Vendidos (por Faturamento)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={productPerformance?.slice(0, 5)} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                <XAxis type="number" stroke="#888" tickFormatter={formatCurrency} />
+                <YAxis type="category" dataKey="productName" stroke="#888" width={120} />
+                <Tooltip contentStyle={{ backgroundColor: '#333', border: 'none' }} formatter={(value: number) => formatCurrency(value)} />
+                <Legend />
+                <Bar dataKey="totalRevenue" fill="#82ca9d" name="Receita" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   );

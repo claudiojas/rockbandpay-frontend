@@ -16,8 +16,13 @@ O objetivo desta fase foi criar uma interface de usuário completamente funciona
     *   Fechamento de Conta do Cliente (`/close-bill/:code`)
     *   Fechamento de Caixa do Operador (`/cash-register/close`)
 3.  **Funcionalidades de Gerenciamento e UX:**
-    *   Dashboard Gerencial com métricas de vendas (`/dashboard`).
-    *   Tela de Consulta de Mesas (`/wristbands-overview`) com:
+    *   **Dashboard Gerencial (`/dashboard`):** Implementado um dashboard completo com múltiplos relatórios para análise de negócio. Utiliza a biblioteca Recharts para visualização de dados e hooks customizados para buscar dados agregados do backend. Funcionalidades incluem:
+        - Faturamento por Mesa.
+        - Faturamento por Forma de Pagamento.
+        - Desempenho de Produtos.
+        - Vendas ao Longo do Tempo.
+        - Filtros por período (semana/mês) que atualizam todos os relatórios dinamicamente.
+    *   **Tela de Consulta de Mesas (`/wristbands-overview`):**
         *   Alternância de visualização (pendentes vs. todas).
         *   Exclusão de pedidos (hard delete).
         *   Desativação de mesas (soft delete).

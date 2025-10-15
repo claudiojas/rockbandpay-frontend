@@ -77,6 +77,23 @@ Implementamos o ciclo de vida completo de um pedido, desde a criação até a en
   - **Painel da Cozinha (`/kitchen`):** Uma tela em tempo real que usa WebSockets. Novos pedidos aparecem na coluna "A Fazer". A cozinha os move para "Em Preparo" e, ao finalizar, o pedido é marcado como `READY` e some da tela.
   - **Monitor do Garçom (`/waiter-monitor`):** Uma nova tela que exibe apenas os pedidos marcados como `READY`. O garçom pode então marcar o pedido como `DELIVERED`, finalizando o ciclo e removendo-o do seu monitor.
 
+---
+
+## Dashboard Gerencial Avançado (Concluído)
+
+Expandimos o dashboard para transformá-lo em uma poderosa ferramenta de análise de negócios.
+
+- **Backend:** Foram criados múltiplos endpoints de agregação em `/reports/` para processar os dados de forma eficiente, com suporte a filtros de período (semana/mês).
+  - `GET /reports/sales-by-table`
+  - `GET /reports/sales-by-payment-method`
+  - `GET /reports/product-performance`
+  - `GET /reports/sales-over-time`
+
+- **Frontend:** A página `/dashboard` foi completamente refatorada.
+  - Utiliza hooks customizados para cada relatório (`useSalesByTable`, etc.).
+  - Exibe múltiplos gráficos (barras, pizza, linha) com a biblioteca Recharts.
+  - Permite a filtragem dinâmica de todos os relatórios por período (últimos 7 ou 30 dias).
+
 ## Desenvolvimento do Backend (Fase 1 - Concluída)
 
 A API RESTful foi construída com uma arquitetura em camadas (`Rotas` -> `UseCases` -> `Repositórios`) e está totalmente coberta por testes de integração, garantindo estabilidade e confiabilidade.

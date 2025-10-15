@@ -47,3 +47,8 @@ A aplicação é dividida em telas com responsabilidades claras:
 - **Arquivo:** `src/routes/waiter-monitor.lazy.tsx`
 - **Função:** Painel para os garçons visualizarem os pedidos que estão prontos para serem entregues.
 - **Fluxo:** Utiliza o novo hook `useOrdersByStatus('READY')` para buscar e exibir apenas os pedidos prontos. O garçom pode marcar um pedido como `DELIVERED`, que o remove da sua tela e finaliza o ciclo de entrega.
+
+### h. Dashboard Gerencial (Rota: `/dashboard`)
+- **Arquivo:** `src/routes/dashboard.lazy.tsx`
+- **Função:** Apresentar uma visão geral do negócio com métricas e relatórios visuais.
+- **Fluxo:** A página utiliza diversos hooks customizados (`useSalesByTable`, `useSalesByPaymentMethod`, etc.) para buscar dados já agregados pela API. Os dados são exibidos em vários gráficos (barras, pizza, linhas) usando a biblioteca Recharts. A página também implementa filtros de período (semana/mês) que atualizam dinamicamente todos os relatórios.
