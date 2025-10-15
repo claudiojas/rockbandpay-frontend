@@ -84,7 +84,7 @@ function OverviewComponent() {
               <CardHeader>
                 <CardTitle className="text-2xl text-amber-400">Mesa {selectedSession.tableNumber}</CardTitle>
               </CardHeader>
-              <CardContent className="max-h-[70vh] overflow-y-auto">
+              <CardContent className="max-h-[70vh] overflow-y-auto text-white">
                 <h3 className="text-lg font-semibold mb-4">Itens Consumidos:</h3>
                 <ul className="space-y-4">
                   {selectedSession.activeOrders.flatMap(order => order.orderItems).map((item: any) => (
