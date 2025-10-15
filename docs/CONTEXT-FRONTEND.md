@@ -33,7 +33,17 @@ A aplicação é dividida em telas com responsabilidades claras:
 - **Função:** Um painel de monitoramento em tempo real para o gerente.
 - **Fluxo:** A tela busca e exibe **apenas** as sessões ativas, mostrando o total consumido em cada uma. Ao selecionar uma sessão, o gerente pode ver todos os itens e tem a opção de **excluir um item individualmente** para corrigir erros de lançamento (chama o endpoint `DELETE /orders/items/:itemId`).
 
-### d. Fechamento de Conta (Rota: `/close-bill/$code`)
-- **Arquivo:** `src/routes/close-bill.$code.lazy.tsx`
-- **Função:** Finalizar e pagar a conta de uma sessão.
-- **Fluxo:** Após o pagamento ser confirmado, a lógica agora invalida o cache da query `active-sessions` (`['active-sessions']`). Isso garante que, ao voltar para a tela principal, a lista de mesas ativas esteja sempre atualizada.
+### e. Gerenciamento de Produtos (Rota: `/manage-products`)
+- **Arquivo:** `src/routes/manage-products.lazy.tsx`
+- **Função:** Tela de administração que lista todos os produtos em uma tabela.
+- **Fluxo:** Permite a edição de detalhes (nome, preço) e a adição de estoque para cada produto através de um modal (`EditProductModal`). Utiliza o hook `useProducts` para buscar os dados e `useMutation` para enviar as atualizações.
+
+### f. Painel da Cozinha (Rota: `/kitchen`)
+- **Arquivo:** `src/routes/kitchen.lazy.tsx`
+- **Função:** Painel em tempo real para a cozinha, no estilo Kanban.
+- **Fluxo:** Conecta-se ao backend via WebSocket para receber novos pedidos instantaneamente na coluna "A Fazer". A cozinha pode mover os pedidos para "Em Preparo". Ao finalizar, o pedido é marcado como `READY` e desaparece da tela.
+
+### g. Monitor do Garçom (Rota: `/waiter-monitor`)
+- **Arquivo:** `src/routes/waiter-monitor.lazy.tsx`
+- **Função:** Painel para os garçons visualizarem os pedidos que estão prontos para serem entregues.
+- **Fluxo:** Utiliza o novo hook `useOrdersByStatus('READY')` para buscar e exibir apenas os pedidos prontos. O garçom pode marcar um pedido como `DELIVERED`, que o remove da sua tela e finaliza o ciclo de entrega.

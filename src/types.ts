@@ -1,3 +1,5 @@
+export type OrderStatus = 'PENDING' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED' | 'PAID';
+
 export interface Product {
   id: string;
   name: string;

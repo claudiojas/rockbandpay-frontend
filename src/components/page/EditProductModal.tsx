@@ -35,7 +35,7 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
   }, [product]);
 
   const updateProductMutation = useMutation({
-    mutationFn: (updatedProduct: Partial<Product>) => {
+    mutationFn: (updatedProduct: { name?: string; price?: number; description?: string }) => {
       return api.patch(`/products/${product.id}`, updatedProduct);
     },
     onSuccess: () => {
@@ -81,7 +81,7 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
         
         {/* Edit Details Form */}
         <form onSubmit={handleDetailsSubmit} className="space-y-4 mb-8 border-b border-gray-700 pb-8">
-          <h3 class="text-xl font-semibold text-amber-400">Detalhes do Produto</h3>
+          <h3 className="text-xl font-semibold text-amber-400">Detalhes do Produto</h3>
           <div>
             <label htmlFor="edit-name" className="font-medium text-gray-300">Nome</label>
             <Input id="edit-name" value={name} onChange={e => setName(e.target.value)} className="bg-gray-700" />
@@ -101,7 +101,7 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
 
         {/* Add Stock Form */}
         <form onSubmit={handleAddStockSubmit} className="space-y-4">
-          <h3 class="text-xl font-semibold text-amber-400">Adicionar Estoque</h3>
+          <h3 className="text-xl font-semibold text-amber-400">Adicionar Estoque</h3>
           <div>
             <label htmlFor="add-stock" className="font-medium text-gray-300">Quantidade a Adicionar</label>
             <Input id="add-stock" type="number" value={stockToAdd} onChange={e => setStockToAdd(e.target.value)} className="bg-gray-700" placeholder="Ex: 20" />

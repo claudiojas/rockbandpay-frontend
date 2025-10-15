@@ -24,26 +24,29 @@ O objetivo desta fase foi criar uma interface de usuário completamente funciona
 
 ---
 
-## Fase 2: Implementação do "Garçom Automatizado" (Próximo Passo)
+## Fase 2: Gerenciamento e Cozinha (Concluída)
 
-**Visão:** Expandir a experiência do usuário criando interfaces para o cliente final e para a cozinha, permitindo um fluxo de autoatendimento completo.
+**Visão:** Expandir a aplicação para dar aos gerentes controle total sobre o ciclo de vida dos produtos e criar painéis de tempo real para a cozinha e para os garçons, otimizando o fluxo de preparação e entrega de pedidos.
 
-### Itens a Desenvolver:
+### Itens Desenvolvidos:
 
-1.  **Criar a WebApp do Cliente (Novo Projeto Frontend):**
-    *   **Objetivo:** Permitir que o cliente visualize o cardápio, faça pedidos e pague sua conta diretamente da mesa.
-    *   **Tecnologias:** React, Vite, TanStack Query, Axios.
-    *   **Funcionalidades:**
-        *   Leitura de QR Code para iniciar a sessão da mesa.
-        *   Navegação no cardápio (consumindo `GET /products`).
-        *   Envio de pedidos (consumindo `POST /orders`).
-        *   Visualização da comanda em tempo real (via WebSockets ou polling para `GET /orders/my-session`).
-        *   Integração com gateway de pagamento para fechar a conta.
+1.  **Gerenciamento Completo de Produtos:**
+    *   **Status:** Concluído.
+    *   **Ação:** Foi criada uma nova página de "Gerenciamento de Produtos" (`/manage-products`) que permite listar, editar detalhes (nome, preço) e adicionar estoque a produtos existentes através de um modal.
+    *   A tela de "Adicionar Produto" agora inclui um campo para "Estoque Inicial".
 
-2.  **Criar o Painel da Cozinha (Nova Tela no Frontend Atual):**
-    *   **Objetivo:** Exibir novos pedidos em tempo real para a equipe da cozinha.
-    *   **Tecnologia:** React, **WebSockets**.
-    *   **Funcionalidade:** Uma nova rota (ex: `/kitchen-display`) que se conecta ao backend via WebSocket e renderiza os pedidos à medida que chegam, permitindo a atualização de seu status (ex: "Preparando", "Pronto").
+2.  **Painel da Cozinha (Kanban):
+    **
+    *   **Status:** Concluído.
+    *   **Ação:** Foi criada a página "Cozinha" (`/kitchen`) que se conecta ao backend via WebSockets.
+    *   Novos pedidos aparecem em tempo real na coluna "A Fazer".
+    *   A cozinha pode mover os pedidos para "Em Preparo". Ao finalizar, o pedido é marcado como "Pronto" e desaparece da tela da cozinha, finalizando a responsabilidade da equipe.
+
+3.  **Monitor do Garçom:
+    **
+    *   **Status:** Concluído.
+    *   **Ação:** Foi criada a página "Monitor do Garçom" (`/waiter-monitor`) que exibe todos os pedidos marcados como "Prontos" pela cozinha.
+    *   O garçom pode marcar um pedido como "Entregue", que atualiza seu status final no sistema e o remove da tela do monitor.
 
 ---
 

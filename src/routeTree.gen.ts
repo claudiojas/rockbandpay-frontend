@@ -12,10 +12,12 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
 
+const WaiterMonitorLazyRouteImport = createFileRoute('/waiter-monitor')()
 const OverviewLazyRouteImport = createFileRoute('/overview')()
 const ManageTablesLazyRouteImport = createFileRoute('/manage-tables')()
 const ManageProductsLazyRouteImport = createFileRoute('/manage-products')()
 const LoginLazyRouteImport = createFileRoute('/login')()
+const KitchenLazyRouteImport = createFileRoute('/kitchen')()
 const DashboardLazyRouteImport = createFileRoute('/dashboard')()
 const IndexLazyRouteImport = createFileRoute('/')()
 const ProductsAddLazyRouteImport = createFileRoute('/products/add')()
@@ -24,6 +26,13 @@ const CashRegisterCloseLazyRouteImport = createFileRoute(
   '/cash-register/close',
 )()
 
+const WaiterMonitorLazyRoute = WaiterMonitorLazyRouteImport.update({
+  id: '/waiter-monitor',
+  path: '/waiter-monitor',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/waiter-monitor.lazy').then((d) => d.Route),
+)
 const OverviewLazyRoute = OverviewLazyRouteImport.update({
   id: '/overview',
   path: '/overview',
@@ -46,6 +55,11 @@ const LoginLazyRoute = LoginLazyRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
+const KitchenLazyRoute = KitchenLazyRouteImport.update({
+  id: '/kitchen',
+  path: '/kitchen',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/kitchen.lazy').then((d) => d.Route))
 const DashboardLazyRoute = DashboardLazyRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -79,10 +93,12 @@ const CashRegisterCloseLazyRoute = CashRegisterCloseLazyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
+  '/kitchen': typeof KitchenLazyRoute
   '/login': typeof LoginLazyRoute
   '/manage-products': typeof ManageProductsLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
   '/overview': typeof OverviewLazyRoute
+  '/waiter-monitor': typeof WaiterMonitorLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
@@ -90,10 +106,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
+  '/kitchen': typeof KitchenLazyRoute
   '/login': typeof LoginLazyRoute
   '/manage-products': typeof ManageProductsLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
   '/overview': typeof OverviewLazyRoute
+  '/waiter-monitor': typeof WaiterMonitorLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
@@ -102,10 +120,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardLazyRoute
+  '/kitchen': typeof KitchenLazyRoute
   '/login': typeof LoginLazyRoute
   '/manage-products': typeof ManageProductsLazyRoute
   '/manage-tables': typeof ManageTablesLazyRoute
   '/overview': typeof OverviewLazyRoute
+  '/waiter-monitor': typeof WaiterMonitorLazyRoute
   '/cash-register/close': typeof CashRegisterCloseLazyRoute
   '/close-bill/$code': typeof CloseBillCodeLazyRoute
   '/products/add': typeof ProductsAddLazyRoute
@@ -115,10 +135,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/kitchen'
     | '/login'
     | '/manage-products'
     | '/manage-tables'
     | '/overview'
+    | '/waiter-monitor'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
@@ -126,10 +148,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/kitchen'
     | '/login'
     | '/manage-products'
     | '/manage-tables'
     | '/overview'
+    | '/waiter-monitor'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
@@ -137,10 +161,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/kitchen'
     | '/login'
     | '/manage-products'
     | '/manage-tables'
     | '/overview'
+    | '/waiter-monitor'
     | '/cash-register/close'
     | '/close-bill/$code'
     | '/products/add'
@@ -149,10 +175,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   DashboardLazyRoute: typeof DashboardLazyRoute
+  KitchenLazyRoute: typeof KitchenLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
   ManageProductsLazyRoute: typeof ManageProductsLazyRoute
   ManageTablesLazyRoute: typeof ManageTablesLazyRoute
   OverviewLazyRoute: typeof OverviewLazyRoute
+  WaiterMonitorLazyRoute: typeof WaiterMonitorLazyRoute
   CashRegisterCloseLazyRoute: typeof CashRegisterCloseLazyRoute
   CloseBillCodeLazyRoute: typeof CloseBillCodeLazyRoute
   ProductsAddLazyRoute: typeof ProductsAddLazyRoute
@@ -160,6 +188,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/waiter-monitor': {
+      id: '/waiter-monitor'
+      path: '/waiter-monitor'
+      fullPath: '/waiter-monitor'
+      preLoaderRoute: typeof WaiterMonitorLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/overview': {
       id: '/overview'
       path: '/overview'
@@ -186,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kitchen': {
+      id: '/kitchen'
+      path: '/kitchen'
+      fullPath: '/kitchen'
+      preLoaderRoute: typeof KitchenLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -229,10 +271,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   DashboardLazyRoute: DashboardLazyRoute,
+  KitchenLazyRoute: KitchenLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
   ManageProductsLazyRoute: ManageProductsLazyRoute,
   ManageTablesLazyRoute: ManageTablesLazyRoute,
   OverviewLazyRoute: OverviewLazyRoute,
+  WaiterMonitorLazyRoute: WaiterMonitorLazyRoute,
   CashRegisterCloseLazyRoute: CashRegisterCloseLazyRoute,
   CloseBillCodeLazyRoute: CloseBillCodeLazyRoute,
   ProductsAddLazyRoute: ProductsAddLazyRoute,

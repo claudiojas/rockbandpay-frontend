@@ -45,6 +45,12 @@ function RootComponent() {
               <Link to="/overview" className="[&.active]:font-bold hover:underline">
                 Consulta de Mesas
               </Link>
+              <Link to="/kitchen" className="[&.active]:font-bold hover:underline">
+                Cozinha
+              </Link>
+              <Link to="/waiter-monitor" className="[&.active]:font-bold hover:underline">
+                Monitor do Garçom
+              </Link>
           </div>
         </div>
       )}
