@@ -34,16 +34,23 @@ function OverviewComponent() {
     queryFn: fetchOverview,
   });
 
-  const deleteOrderItemMutation = useMutation({
-    mutationFn: (itemId: string) => api.delete(`/orders/items/${itemId}`),
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderId: string) => api.patch(`/orders/${orderId}/status`, { status: 'CANCELLED' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['overview-sessions'] });
     },
+    onError: (error: any) => {
+      if (error.response && error.response.data && error.response.data.error) {
+        alert(`Erro: ${error.response.data.error}`);
+      } else {
+        alert('Ocorreu um erro ao cancelar o pedido.');
+      }
+    }
   });
 
-  const handleDeleteItem = (itemId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este item? A ação não pode ser desfeita.')) {
-      deleteOrderItemMutation.mutate(itemId);
+  const handleCancelOrder = (orderId: string) => {
+    if (window.confirm('Tem certeza que deseja cancelar este pedido? A cozinha será notificada.')) {
+      cancelOrderMutation.mutate(orderId);
     }
   };
 
@@ -86,20 +93,43 @@ function OverviewComponent() {
                 <CardTitle className="text-2xl text-amber-400">Mesa {selectedSession.tableNumber}</CardTitle>
               </CardHeader>
               <CardContent className="max-h-[70vh] overflow-y-auto text-white">
-                <h3 className="text-lg font-semibold mb-4">Itens Consumidos:</h3>
-                <ul className="space-y-4">
-                  {selectedSession.activeOrders.flatMap(order => order.orderItems).map((item: any) => (
-                    <li key={item.id} className="flex justify-between items-center bg-gray-700 p-3 rounded-md">
-                      <div>
-                        <p className="font-semibold">{item.quantity}x {item.product.name}</p>
-                        <p className="text-sm text-gray-400">Preço: R$ {Number(item.totalPrice).toFixed(2)}</p>
+                <h3 className="text-lg font-semibold mb-4">Pedidos da Sessão:</h3>
+                <div className="space-y-6">
+                  {selectedSession.activeOrders.map((order: any) => (
+                    <div key={order.id} className="bg-gray-700 p-4 rounded-lg">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="font-bold">Pedido #{order.id.substring(0, 8)}</p>
+                          <p className={`text-sm font-semibold ${
+                            order.status === 'PENDING' ? 'text-yellow-400' : 
+                            order.status === 'PREPARING' ? 'text-blue-400' :
+                            order.status === 'CANCELLED' ? 'text-red-500' : 'text-gray-400'
+                          }`}>
+                            Status: {order.status}
+                          </p>
+                        </div>
+                        <div title={order.status !== 'PENDING' ? 'Pedidos em preparo ou finalizados não podem ser cancelados.' : 'Cancelar o pedido inteiro'}>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleCancelOrder(order.id)}
+                            disabled={order.status !== 'PENDING'}
+                          >
+                            Cancelar Pedido
+                          </Button>
+                        </div>
                       </div>
-                      <Button variant="destructive" size="sm" onClick={() => handleDeleteItem(item.id)}>
-                        Excluir
-                      </Button>
-                    </li>
+                      <ul className="space-y-2 border-t border-gray-600 pt-3">
+                        {order.orderItems.map((item: any) => (
+                          <li key={item.id} className="flex justify-between items-center text-sm">
+                            <p>{item.quantity}x {item.product.name}</p>
+                            <p className="text-gray-400">R$ {Number(item.totalPrice).toFixed(2)}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </CardContent>
             </Card>
           ) : (
