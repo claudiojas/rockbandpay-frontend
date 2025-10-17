@@ -12,7 +12,7 @@ O objetivo desta fase foi criar uma interface de usuário completamente funciona
 2.  **Telas Principais:**
     *   Tela de Abertura de Caixa (`/login`)
     *   Ponto de Venda (PDV) (`/`)
-    *   Gerenciamento de Produtos e Pulseiras (`/products/add`, `/wristbands`)
+    *   Gerenciamento de Produtos e Mesas (`/products/add`, `/manage-tables`)
     *   Fechamento de Conta do Cliente (`/close-bill/:code`)
     *   Fechamento de Caixa do Operador (`/cash-register/close`)
 3.  **Funcionalidades de Gerenciamento e UX:**
@@ -22,7 +22,7 @@ O objetivo desta fase foi criar uma interface de usuário completamente funciona
         - Desempenho de Produtos.
         - Vendas ao Longo do Tempo.
         - Filtros por período (semana/mês) que atualizam todos os relatórios dinamicamente.
-    *   **Tela de Consulta de Mesas (`/wristbands-overview`):**
+    *   **Tela de Consulta de Sessões (`/overview`):**
         *   Alternância de visualização (pendentes vs. todas).
         *   Exclusão de pedidos (hard delete).
         *   Desativação de mesas (soft delete).

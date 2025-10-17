@@ -80,7 +80,9 @@ function ManageTables() {
   };
 
   const getTableUrl = (tableId: string) => {
-    return `${window.location.origin}/customer/start?tableId=${tableId}`;
+    // Em um ambiente de produção, o ideal é que esta URL base venha de uma variável de ambiente.
+    const customerAppUrl = 'http://192.168.1.10:5173'; 
+    return `${customerAppUrl}/?table=${tableId}`;
   };
 
   return (
@@ -144,6 +146,7 @@ function ManageTables() {
                     />
                     <div className="flex items-center gap-3 pt-6">
                       <h4 className="text-xl font-bold text-amber-400">Mesa {table.tableNumber}</h4>
+<p className="text-xs text-gray-500">ID: {table.id}</p>
                       {isActive && <span className="text-xs bg-green-500 text-white font-bold py-1 px-2 rounded-full">ATIVA</span>}
                     </div>
                     <div className="bg-white p-4 rounded-md">

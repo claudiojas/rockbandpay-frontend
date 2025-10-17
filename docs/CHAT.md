@@ -29,8 +29,8 @@ A interface do sistema para o operador de caixa foi finalizada, utilizando uma a
 O fluxo de trabalho completo do operador de caixa foi implementado, incluindo:
 
 1.  **Tela de Login / Abertura de Caixa (`/login`):** Garante que um caixa seja aberto antes de usar o sistema.
-2.  **Tela de Ponto de Venda (`/`):** Interface principal para registrar pedidos, consultar produtos e associá-los a pulseiras.
-3.  **Telas de Gerenciamento (`/products/add`, `/wristbands`):** Permitem o cadastro de novos produtos, categorias e pulseiras.
+2.  **Tela de Ponto de Venda (`/`):** Interface principal para registrar pedidos, consultar produtos e associá-los a mesas.
+3.  **Telas de Gerenciamento (`/products/add`, `/manage-tables`):** Permitem o cadastro de novos produtos, categorias e mesas.
 4.  **Tela de Fechamento de Conta (`/close-bill/$code`):** Para o cliente finalizar e pagar sua conta.
 5.  **Tela de Fechamento de Caixa (`/cash-register/close`):** Relatório final do dia para o operador, com resumo financeiro e de vendas.
 
