@@ -68,7 +68,7 @@ function KitchenDisplay() {
 
       ws.onmessage = (event) => {
         const parsedMessage = JSON.parse(event.data);
-        if (parsedMessage.type === 'NEW_ORDER' || parsedMessage.type === 'UPDATE_ORDER') {
+        if (parsedMessage.type === 'NEW_ORDER' || parsedMessage.type === 'UPDATE_ORDER' || parsedMessage.type === 'ORDER_STATUS_UPDATED') {
           queryClient.invalidateQueries({ queryKey: ['orders'] });
         }
       };
