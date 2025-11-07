@@ -14,14 +14,6 @@ function RootComponent() {
     }
   }, [isLoading, isActive, location.pathname, navigate]);
 
-  if (isLoading && location.pathname !== '/login') {
-    return (
-      <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
-        <p className="text-2xl">Verificando status do caixa...</p>
-      </div>
-    );
-  }
-
   return (
     <TableProvider>
       {location.pathname !== '/login' && (
@@ -56,6 +48,13 @@ function RootComponent() {
       )}
       <hr className="border-gray-700" />
       <Outlet />
+
+      {/* Overlay de Carregamento */}
+      {isLoading && location.pathname !== '/login' && (
+        <div className="absolute inset-0 w-full h-screen flex flex-col items-center justify-center bg-gray-900/80 backdrop-blur-sm text-white z-50">
+          <p className="text-2xl">Verificando status do caixa...</p>
+        </div>
+      )}
     </TableProvider>
   );
 }

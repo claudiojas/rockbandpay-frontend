@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createLazyFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/axios';
 import type { IOrder } from '@/types';
+import { useOrdersByStatus } from '../hooks/useOrdersByStatus';
 
 export const Route = createLazyFileRoute('/kitchen')({
   component: KitchenDisplay,
@@ -49,60 +49,72 @@ const OrderCard = ({ order, onUpdateStatus }: { order: IOrder, onUpdateStatus: (
 };
 
 function KitchenDisplay() {
-  const [pending, setPending] = useState<IOrder[]>([]);
-  const [inProgress, setInProgress] = useState<IOrder[]>([]);
+  const queryClient = useQueryClient();
 
+  const { data: pendingOrders } = useOrdersByStatus('PENDING');
+  const { data: preparingOrders } = useOrdersByStatus('PREPARING');
+  const { data: cancelledOrders } = useOrdersByStatus('CANCELLED');
+
+  // WebSocket connection for real-time invalidation
   useEffect(() => {
-    api.get('/orders').then(response => {
-      const orders: IOrder[] = response.data;
-      setPending(orders.filter(o => o.status === 'PENDING'));
-      setInProgress(orders.filter(o => o.status === 'PREPARING'));
-    });
-  }, []);
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout>;
 
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3000/ws/kitchen');
+    const connect = () => {
+      ws = new WebSocket(`ws://${window.location.host}/ws/kitchen`);
 
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      const orderPayload: IOrder = message.payload;
+      ws.onopen = () => {
+      };
 
-      if (message.type === 'NEW_ORDER') {
-        setPending(prev => [orderPayload, ...prev]);
-      } else if (message.type === 'ORDER_STATUS_UPDATED') {
-        const updatedOrder = orderPayload;
-
-        setPending(prev => prev.filter(o => o.id !== updatedOrder.id));
-        setInProgress(prev => prev.filter(o => o.id !== updatedOrder.id));
-
-        if (updatedOrder.status === 'PENDING') {
-          setPending(prev => [updatedOrder, ...prev]);
-        } else if (updatedOrder.status === 'PREPARING') {
-          setInProgress(prev => [updatedOrder, ...prev]);
-        } else if (updatedOrder.status === 'CANCELLED') {
-          setPending(prev => [updatedOrder, ...prev]);
+      ws.onmessage = (event) => {
+        const parsedMessage = JSON.parse(event.data);
+        if (parsedMessage.type === 'NEW_ORDER' || parsedMessage.type === 'UPDATE_ORDER') {
+          queryClient.invalidateQueries({ queryKey: ['orders'] });
         }
-      }
+      };
+
+      ws.onclose = () => {
+        console.log('Kitchen WebSocket disconnected, attempting to reconnect in 3 seconds...');
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('Kitchen WebSocket error:', error);
+        ws?.close(); // This will trigger onclose and the reconnect logic
+      };
     };
 
-    ws.onclose = () => {
-      console.log('Kitchen WebSocket disconnected');
-    };
+    connect();
 
     return () => {
-      ws.close();
+      clearTimeout(reconnectTimer);
+      if (ws) {
+        ws.onclose = null; // Prevent reconnect logic from firing on manual close
+        ws.close();
+      }
     };
-  }, []);
+  }, [queryClient]);
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ orderId, status }: { orderId: string, status: 'PREPARING' | 'READY' }) => {
       return api.patch(`/orders/${orderId}/status`, { status });
+    },
+    onSuccess: () => {
+      // Invalidate queries on success to reflect the change immediately
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
 
   const handleUpdateStatus = (orderId: string, status: 'PREPARING' | 'READY') => {
     updateStatusMutation.mutate({ orderId, status });
   };
+
+  const pending = [...(pendingOrders || []), ...(cancelledOrders || [])]
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    
+  const inProgress = (preparingOrders || [])
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   return (
     <div className="p-8 bg-gray-900 text-white min-h-screen">

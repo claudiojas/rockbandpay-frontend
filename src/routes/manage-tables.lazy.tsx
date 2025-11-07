@@ -80,8 +80,8 @@ function ManageTables() {
   };
 
   const getTableUrl = (tableId: string) => {
-    // Em um ambiente de produção, o ideal é que esta URL base venha de uma variável de ambiente.
-    const customerAppUrl = 'http://192.168.1.10:5173'; 
+    const host = window.location.hostname;
+    const customerAppUrl = `http://${host}:5173`; 
     return `${customerAppUrl}/?table=${tableId}`;
   };
 
