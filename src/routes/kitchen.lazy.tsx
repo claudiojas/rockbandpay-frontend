@@ -51,48 +51,39 @@ const OrderCard = ({ order, onUpdateStatus }: { order: IOrder, onUpdateStatus: (
 function KitchenDisplay() {
   const queryClient = useQueryClient();
 
-  const { data: pendingOrders } = useOrdersByStatus('PENDING');
-  const { data: preparingOrders } = useOrdersByStatus('PREPARING');
-  const { data: cancelledOrders } = useOrdersByStatus('CANCELLED');
+  const { data: pendingOrders, isLoading: isLoadingPending } = useOrdersByStatus('PENDING');
+  const { data: preparingOrders, isLoading: isLoadingPreparing } = useOrdersByStatus('PREPARING');
+  const { data: cancelledOrders, isLoading: isLoadingCancelled } = useOrdersByStatus('CANCELLED');
 
-  // WebSocket connection for real-time invalidation
   useEffect(() => {
-    let ws: WebSocket | null = null;
-    let reconnectTimer: ReturnType<typeof setTimeout>;
+    const ws = new WebSocket(`ws://${window.location.host}/ws/kitchen`);
 
-    const connect = () => {
-      ws = new WebSocket(`ws://${window.location.host}/ws/kitchen`);
-
-      ws.onopen = () => {
-      };
-
-      ws.onmessage = (event) => {
-        const parsedMessage = JSON.parse(event.data);
-        if (parsedMessage.type === 'NEW_ORDER' || parsedMessage.type === 'UPDATE_ORDER' || parsedMessage.type === 'ORDER_STATUS_UPDATED') {
-          queryClient.invalidateQueries({ queryKey: ['orders'] });
-        }
-      };
-
-      ws.onclose = () => {
-        console.log('Kitchen WebSocket disconnected, attempting to reconnect in 3 seconds...');
-        clearTimeout(reconnectTimer);
-        reconnectTimer = setTimeout(connect, 3000);
-      };
-
-      ws.onerror = (error) => {
-        console.error('Kitchen WebSocket error:', error);
-        ws?.close(); // This will trigger onclose and the reconnect logic
-      };
+    ws.onopen = () => {
+      // console.log('Kitchen WebSocket connected');
     };
 
-    connect();
+    ws.onmessage = (event) => {
+      const parsedMessage = JSON.parse(event.data);
+      if (parsedMessage.type === 'NEW_ORDER' || parsedMessage.type === 'UPDATE_ORDER' || parsedMessage.type === 'ORDER_STATUS_UPDATED') {
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+      } else if (parsedMessage.type === 'SESSION_CLOSED') {
+        const { sessionId: closedSessionId } = parsedMessage.payload;
+        const statusesToUpdate: ('PENDING' | 'PREPARING' | 'CANCELLED')[] = ['PENDING', 'PREPARING', 'CANCELLED'];
+        statusesToUpdate.forEach(status => {
+          queryClient.setQueryData(['orders', status], (oldData: IOrder[] | undefined) => {
+            if (!oldData) return [];
+            return oldData.filter(order => order.sessionId !== closedSessionId);
+          });
+        });
+      }
+    };
+
+    ws.onclose = () => {
+      // console.log('Kitchen WebSocket disconnected');
+    };
 
     return () => {
-      clearTimeout(reconnectTimer);
-      if (ws) {
-        ws.onclose = null; // Prevent reconnect logic from firing on manual close
-        ws.close();
-      }
+      ws.close();
     };
   }, [queryClient]);
 
